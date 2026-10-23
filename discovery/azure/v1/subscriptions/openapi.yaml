@@ -1,0 +1,15 @@
+openapi: 3.0.3
+info: { title: Azure Resource Manager subscriptions, version: 2022-12-01 }
+servers: [{ url: https://management.azure.com }]
+paths:
+  /subscriptions:
+    get:
+      parameters: [{ name: api-version, in: query, required: true, schema: { type: string, enum: ['2022-12-01'] } }]
+      responses:
+        '200': { description: SubscriptionListResult, content: { application/json: { schema: { $ref: '#/components/schemas/SubscriptionListResult' } } } }
+        '403': { description: CloudError, content: { application/json: { schema: { $ref: '#/components/schemas/CloudError' } } } }
+components:
+  schemas:
+    SubscriptionListResult: { type: object, properties: { value: { type: array, items: { $ref: '#/components/schemas/Subscription' } }, nextLink: { type: string, format: uri } } }
+    Subscription: { type: object, properties: { id: { type: string }, subscriptionId: { type: string, format: uuid }, displayName: { type: string }, state: { type: string } } }
+    CloudError: { type: object, properties: { error: { type: object, properties: { code: { type: string }, message: { type: string } } } } }

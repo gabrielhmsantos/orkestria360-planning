@@ -1,0 +1,151 @@
+version: governance-evidence-form-v1
+purpose: >-
+  Definir os oito tópicos de Estruturação e Governança como formulários híbridos
+  revisáveis, capazes de produzir evidências verificadas para o IMDO.
+
+review_scale:
+  absent: { score: 0, label: "Ausente ou não conforme" }
+  partial: { score: 60, label: "Parcial, incompleto ou desatualizado" }
+  conformant: { score: 100, label: "Completo, aprovado e atual" }
+
+submission_modes:
+  text: "Resposta estruturada preenchida no Orkestria."
+  template_file: "Arquivo obrigatório no template fornecido; o sistema valida formato e colunas quando aplicável."
+  text_or_file: "Resposta estruturada ou documento anexado; ambos exigem revisão humana."
+
+common_topic_fields:
+  - owner_name
+  - validity_months
+  - last_reviewed_at
+  - notes
+
+common_review_fields:
+  - status
+  - score
+  - reviewer_notes
+  - reviewed_by
+  - reviewed_at
+
+topics:
+  - key: inventario-de-ativos-de-ti
+    title: "Inventário de Ativos de TI"
+    primary_submission_mode: template_file
+    accepted_formats: [csv, xlsx]
+    template: "inventario-de-ativos-v1.xlsx"
+    imdo_evidence_keys: [governance.asset_inventory, governance.asset_inventory_coverage]
+    sections:
+      - { key: scope, title: "Objetivo e escopo", weight: 10, mode: text, fields: [objective, covered_units, covered_environments] }
+      - { key: categories, title: "Categorias de ativos", weight: 15, mode: template_file, fields: [asset_category, asset_type, environment] }
+      - { key: inventory, title: "Inventário consolidado", weight: 25, mode: template_file, fields: [asset_id, asset_name, owner, status, location] }
+      - { key: identification, title: "Identificação e rastreabilidade", weight: 15, mode: text_or_file, fields: [identification_criteria, owner_assignment, lifecycle_status] }
+      - { key: maintenance, title: "Responsáveis e atualização", weight: 15, mode: text, fields: [technical_owner, update_frequency, last_update_at] }
+      - { key: coverage, title: "Cobertura e divergências", weight: 10, mode: text, fields: [coverage_percent, reconciliation_reference, divergence_count] }
+      - { key: gaps, title: "Lacunas, riscos e pendências", weight: 10, mode: text, fields: [known_gaps, risks, remediation_plan] }
+
+  - key: inventario-de-licencas-e-softwares
+    title: "Inventário de Licenças e Softwares"
+    primary_submission_mode: template_file
+    accepted_formats: [csv, xlsx]
+    template: "inventario-de-licencas-e-softwares-v1.xlsx"
+    imdo_evidence_keys: [governance.license_inventory, licensing.inventory_approval, licensing.renewal_management]
+    sections:
+      - { key: scope, title: "Objetivo e escopo", weight: 10, mode: text, fields: [objective, covered_products, covered_units] }
+      - { key: categories, title: "Categorias monitoradas", weight: 10, mode: template_file, fields: [software_category, vendor, product_name] }
+      - { key: quantities, title: "Quantidades contratadas e utilizadas", weight: 25, mode: template_file, fields: [sku, contracted_quantity, assigned_quantity, available_quantity] }
+      - { key: ownership, title: "Responsáveis pela gestão", weight: 10, mode: text, fields: [commercial_owner, technical_owner, approval_owner] }
+      - { key: renewals, title: "Vencimentos e renovações", weight: 20, mode: text_or_file, fields: [renewal_date, renewal_alerts, renewal_owner, renewal_status] }
+      - { key: reconciliation, title: "Atualização e conciliação", weight: 15, mode: text, fields: [update_frequency, last_reconciliation_at, graph_reconciliation_status] }
+      - { key: risks, title: "Riscos, desvios e pendências", weight: 10, mode: text, fields: [unused_licenses, expired_licenses, sizing_risks, action_plan] }
+
+  - key: matriz-de-acessos-e-permissoes
+    title: "Matriz de Acessos e Permissões"
+    primary_submission_mode: template_file
+    accepted_formats: [csv, xlsx]
+    template: "matriz-de-acessos-e-permissoes-v1.xlsx"
+    imdo_evidence_keys: [governance.access_matrix, security.access_governance, security.privileged_access_governance]
+    sections:
+      - { key: scope, title: "Sistemas e ambientes cobertos", weight: 10, mode: template_file, fields: [system, environment, coverage_percent] }
+      - { key: profiles, title: "Perfis e permissões", weight: 20, mode: template_file, fields: [role, permission, system, role_owner] }
+      - { key: lifecycle, title: "Concessão, alteração e revogação", weight: 20, mode: text_or_file, fields: [grant_process, change_process, revoke_process, required_evidence] }
+      - { key: approvers, title: "Responsáveis e aprovadores", weight: 10, mode: template_file, fields: [requester, approver, executor, reviewer] }
+      - { key: review_cycle, title: "Revisão periódica", weight: 15, mode: text, fields: [review_frequency, last_review_at, next_review_at] }
+      - { key: privileged_access, title: "Acessos privilegiados", weight: 15, mode: text_or_file, fields: [privileged_roles, privileged_review, emergency_accounts] }
+      - { key: critical_controls, title: "MFA, exceções e controles críticos", weight: 10, mode: text, fields: [mfa_required, conditional_access_reference, exceptions] }
+
+  - key: mapa-de-rede-e-infraestrutura
+    title: "Mapa de Rede e Infraestrutura"
+    primary_submission_mode: text_or_file
+    accepted_formats: [pdf, png, jpg, docx, drawio]
+    template: "mapa-de-rede-e-infraestrutura-v1.drawio"
+    imdo_evidence_keys: [governance.infrastructure_documentation, availability.infrastructure_resilience, availability.disaster_recovery_documentation]
+    sections:
+      - { key: scope, title: "Escopo dos ambientes", weight: 10, mode: text, fields: [sites, cloud_environments, networks, coverage_percent] }
+      - { key: components, title: "Componentes críticos", weight: 20, mode: text_or_file, fields: [servers, firewalls, switches, connectivity, microsoft_365, azure] }
+      - { key: interconnections, title: "Interconexões principais", weight: 15, mode: text_or_file, fields: [network_diagram, integrations, data_flows, dependencies] }
+      - { key: redundancy, title: "Redundância e contingência", weight: 20, mode: text_or_file, fields: [redundancy_design, failover_process, single_points_of_failure] }
+      - { key: coverage, title: "Cobertura por unidade, site ou cloud", weight: 15, mode: text, fields: [covered_locations, uncovered_locations, coverage_percent] }
+      - { key: maintenance, title: "Manutenção e revisão", weight: 10, mode: text, fields: [technical_owner, review_frequency, last_review_at] }
+      - { key: gaps, title: "Lacunas técnicas e documentais", weight: 10, mode: text, fields: [gaps, risks, remediation_plan] }
+
+  - key: politica-de-seguranca-da-informacao
+    title: "Política de Segurança da Informação"
+    primary_submission_mode: text_or_file
+    accepted_formats: [pdf, docx]
+    template: "politica-de-seguranca-da-informacao-v1.docx"
+    imdo_evidence_keys: [governance.corporate_policies, compliance.lgpd_governance, compliance.iso27001_governance, availability.backup_policy]
+    sections:
+      - { key: scope, title: "Objetivo, escopo e públicos", weight: 10, mode: text_or_file, fields: [objective, scope, covered_audiences, applicability] }
+      - { key: governance, title: "Diretrizes e responsabilidades", weight: 15, mode: text_or_file, fields: [security_guidelines, responsibilities, policy_owner] }
+      - { key: identity, title: "Identidade e controle de acesso", weight: 10, mode: text_or_file, fields: [mfa_policy, privileged_access_policy, password_policy, access_review_policy] }
+      - { key: data_protection, title: "Proteção e classificação da informação", weight: 15, mode: text_or_file, fields: [information_classification, data_handling, dlp_policy, retention_policy] }
+      - { key: privacy, title: "Privacidade e LGPD", weight: 15, mode: text_or_file, fields: [dpo_defined, personal_data_inventory, privacy_guidelines, incident_notification] }
+      - { key: continuity, title: "Backup e continuidade", weight: 15, mode: text_or_file, fields: [backup_policy_exists, retention_definition, restore_testing, disaster_recovery_reference] }
+      - { key: workplace, title: "BYOD, dispositivos e uso aceitável", weight: 5, mode: text_or_file, fields: [byod_policy, device_management, acceptable_use] }
+      - { key: approval, title: "Aprovação e ciclo de revisão", weight: 10, mode: text, fields: [formal_approval, approved_at, review_frequency, next_review_at] }
+      - { key: gaps, title: "Pendências e anexos", weight: 5, mode: text, fields: [known_gaps, related_documents, remediation_plan] }
+
+  - key: procedimentos-de-controle-de-acessos
+    title: "Procedimentos de Controle de Acessos"
+    primary_submission_mode: text_or_file
+    accepted_formats: [pdf, docx]
+    template: "procedimentos-de-controle-de-acessos-v1.docx"
+    imdo_evidence_keys: [governance.access_procedures, security.joiner_mover_leaver_process, security.access_request_sla]
+    sections:
+      - { key: scope, title: "Fluxos e áreas cobertas", weight: 10, mode: text, fields: [covered_flows, participating_areas, covered_systems] }
+      - { key: request, title: "Solicitação de acesso", weight: 15, mode: text_or_file, fields: [request_channels, requester_identification, required_justification] }
+      - { key: approval, title: "Aprovação", weight: 15, mode: text_or_file, fields: [approver_rules, segregation_of_duties, approval_evidence] }
+      - { key: provisioning, title: "Concessão e alteração", weight: 15, mode: text_or_file, fields: [provisioning_process, change_process, executor] }
+      - { key: revocation, title: "Revogação e desligamento", weight: 15, mode: text_or_file, fields: [offboarding_process, revocation_sla, periodic_cleanup] }
+      - { key: sla, title: "SLA e controles operacionais", weight: 15, mode: text, fields: [target_sla, measured_sla, operational_controls, monitoring] }
+      - { key: evidence, title: "Evidências e auditoria", weight: 10, mode: text_or_file, fields: [audit_trail, request_records, approval_records] }
+      - { key: exceptions, title: "Gargalos, riscos e exceções", weight: 5, mode: text, fields: [exceptions, risks, remediation_plan] }
+
+  - key: documentacao-de-processos-de-ti
+    title: "Documentação de Processos de TI"
+    primary_submission_mode: text_or_file
+    accepted_formats: [pdf, docx, xlsx]
+    template: "catalogo-de-processos-de-ti-v1.xlsx"
+    imdo_evidence_keys: [governance.it_processes, governance.operational_kpis, availability.incident_process]
+    sections:
+      - { key: scope, title: "Escopo e categorias de processos", weight: 10, mode: text_or_file, fields: [covered_processes, process_categories, coverage_percent] }
+      - { key: incident, title: "Gestão de incidentes", weight: 15, mode: text_or_file, fields: [incident_process, critical_incident_flow, escalation, communication] }
+      - { key: change, title: "Gestão de mudanças e problemas", weight: 15, mode: text_or_file, fields: [change_process, problem_process, approval_flow, post_incident_review] }
+      - { key: lifecycle, title: "Ativos, riscos e continuidade", weight: 15, mode: text_or_file, fields: [asset_process, risk_process, continuity_process] }
+      - { key: kpis, title: "Indicadores operacionais", weight: 15, mode: text_or_file, fields: [defined_kpis, sla_kpis, availability_kpis, security_kpis, cost_kpis] }
+      - { key: ownership, title: "Responsáveis e organização documental", weight: 10, mode: text, fields: [process_owners, document_repository, document_standard] }
+      - { key: versioning, title: "Versionamento e revisão", weight: 10, mode: text, fields: [versioning_method, review_frequency, last_review_at] }
+      - { key: gaps, title: "Cobertura e gaps prioritários", weight: 10, mode: text, fields: [operational_coverage, priority_gaps, remediation_plan] }
+
+  - key: relatorios-de-diagnostico-e-recomendacoes
+    title: "Relatórios de Diagnóstico e Recomendações"
+    primary_submission_mode: text_or_file
+    accepted_formats: [pdf, docx, xlsx]
+    template: "relatorio-de-diagnostico-e-recomendacoes-v1.docx"
+    imdo_evidence_keys: [governance.diagnostics, governance.action_plan, governance.remediation_tracking]
+    sections:
+      - { key: scope, title: "Temas avaliados e origem", weight: 15, mode: text, fields: [assessed_topics, data_sources, assessment_period, methodology_reference] }
+      - { key: findings, title: "Achados e riscos", weight: 20, mode: text_or_file, fields: [findings, risk_level, affected_area, supporting_evidence] }
+      - { key: recommendations, title: "Recomendações críticas", weight: 20, mode: text_or_file, fields: [recommendation, expected_outcome, estimated_effort, dependencies] }
+      - { key: prioritization, title: "Priorização", weight: 15, mode: text, fields: [priority, business_impact, urgency, decision_owner] }
+      - { key: action_tracking, title: "Acompanhamento das ações", weight: 15, mode: text, fields: [action_owner, due_date, action_status, progress_percent] }
+      - { key: closure, title: "Pendências e próximos passos", weight: 15, mode: text, fields: [open_items, next_steps, follow_up_date, escalation] }

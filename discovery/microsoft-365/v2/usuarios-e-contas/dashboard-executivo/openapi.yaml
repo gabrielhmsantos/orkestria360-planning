@@ -1,0 +1,21 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — Dashboard Executivo, version: v1 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /users:
+    get: { summary: Evidência de população e saúde, security: [{ graphApp: [] }], parameters: [{ $ref: '#/components/parameters/top' }, { $ref: '#/components/parameters/select' }, { $ref: '#/components/parameters/expand' }], responses: { '200': { $ref: '#/components/responses/collection' }, '403': { $ref: '#/components/responses/error' } } }
+  /reports/authenticationMethods/userRegistrationDetails:
+    get: { summary: Registro MFA, security: [{ graphApp: [] }], responses: { '200': { $ref: '#/components/responses/collection' }, '403': { $ref: '#/components/responses/error' } } }
+  /identityProtection/riskyUsers:
+    get: { summary: Usuários em risco (P2), security: [{ graphApp: [] }], responses: { '200': { $ref: '#/components/responses/collection' }, '403': { $ref: '#/components/responses/error' } } }
+  /auditLogs/directoryAudits:
+    get: { summary: Eventos administrativos, security: [{ graphApp: [] }], responses: { '200': { $ref: '#/components/responses/collection' }, '403': { $ref: '#/components/responses/error' } } }
+  /directoryRoles:
+    get: { summary: Roles ativadas usadas no KPI de administradores; RoleManagement.Read.Directory, security: [{ graphApp: [] }], responses: { '200': { $ref: '#/components/responses/collection' }, '403': { $ref: '#/components/responses/error' } } }
+  /roleManagement/directory/roleAssignments:
+    get: { summary: Atribuições usadas no KPI de administradores; RoleManagement.Read.Directory, security: [{ graphApp: [] }], responses: { '200': { $ref: '#/components/responses/collection' }, '403': { $ref: '#/components/responses/error' } } }
+components:
+  securitySchemes: { graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token', scopes: { 'https://graph.microsoft.com/.default': Consentimentos Graph da aplicação } } } } }
+  parameters: { top: { name: '$top', in: query, description: 'Máximo 500 quando signInActivity for selecionado', schema: { type: integer, maximum: 500 } }, select: { name: '$select', in: query, schema: { type: string, example: 'id,displayName,userPrincipalName,mail,accountEnabled,userType,department,jobTitle,companyName,employeeId,usageLocation,createdDateTime,assignedLicenses,onPremisesSyncEnabled,signInActivity' } }, expand: { name: '$expand', in: query, schema: { type: string, example: 'manager($select=id)' } } }
+  responses: { collection: { description: Coleção Graph, content: { application/json: { schema: { $ref: '#/components/schemas/collection' } } } }, error: { description: Permissão, licença ou erro Graph, content: { application/json: { schema: { type: object } } } } }
+  schemas: { collection: { type: object, required: [value], properties: { value: { type: array, items: { type: object, additionalProperties: true } }, '@odata.nextLink': { type: string } } } }

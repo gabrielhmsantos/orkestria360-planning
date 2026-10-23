@@ -1,0 +1,147 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — Secure Score, version: v1.0 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /security/secureScores:
+    get:
+      summary: Lista fotografias diárias de Secure Score
+      security: [{ graphApp: [] }]
+      parameters:
+        - { name: '$top', in: query, schema: { type: integer, minimum: 1, maximum: 100 } }
+        - { name: '$skip', in: query, schema: { type: integer, minimum: 0 } }
+        - { name: '$filter', in: query, schema: { type: string } }
+        - { name: '$count', in: query, schema: { type: boolean } }
+      responses:
+        '200': { description: Coleção OData de fotografias, content: { application/json: { schema: { $ref: '#/components/schemas/SecureScoreCollection' } } } }
+        '401': { description: Token ausente ou inválido }
+        '403': { description: Sem SecurityEvents.Read.All ou consentimento }
+        '429': { description: Throttling; observar Retry-After }
+  /deviceManagement/managedDevices:
+    get:
+      summary: Inventário Intune para conformidade de dispositivos gerenciados
+      security: [{ graphApp: [] }]
+      parameters: [{ name: '$select', in: query, schema: { type: string, example: 'id,azureADDeviceId,complianceState,partnerReportedThreatState,lastSyncDateTime' } }]
+      responses: { '200': { description: Coleção OData de dispositivos gerenciados, content: { application/json: { schema: { $ref: '#/components/schemas/ManagedDeviceCollection' } } } }, '401': { description: Restrição observada; requer licença Intune e DeviceManagementManagedDevices.Read.All }, '403': { description: Sem consentimento ou licença Intune } }
+  /sites/getAllSites:
+    get:
+      summary: Enumera sites SharePoint e OneDrive em todas as geografias
+      security: [{ graphApp: [] }]
+      responses: { '200': { description: Coleção OData paginável de sites, content: { application/json: { schema: { $ref: '#/components/schemas/SiteCollection' } } } }, '403': { description: Sem Sites.Read.All } }
+  /sites/{site-id}/permissions:
+    get:
+      summary: Lista permissões diretas de um site, sem cobertura de subsites ou itens
+      description: Operação exclusivamente de leitura; o conector SharePoint bloqueia métodos que não sejam GET mesmo com Sites.FullControl.All. Uma resposta 200 com value vazio é uma coleção permission[] válida sem permissões diretas retornadas para o site, não uma inferência sobre subsites ou itens.
+      security: [{ graphApp: [] }]
+      parameters: [{ name: site-id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: Coleção OData de permissões diretas; value vazio é válido, content: { application/json: { schema: { $ref: '#/components/schemas/SitePermissionCollection' } } } }, '403': { description: Restrição observada; requer Sites.FullControl.All } }
+  /admin/sharepoint/settings:
+    get:
+      summary: Lê política global de compartilhamento SharePoint e OneDrive
+      description: Operação exclusivamente de leitura; nenhum método de alteração é autorizado no conector SharePoint.
+      security: [{ graphApp: [] }]
+      responses: { '200': { description: Configuração global SharePoint, content: { application/json: { schema: { $ref: '#/components/schemas/SharePointSettings' } } } }, '403': { description: Restrição observada; requer SharePointTenantSettings.Read.All } }
+  /users/{user-id}/mailFolders/inbox/messageRules:
+    get:
+      summary: Lista regras da Caixa de Entrada de uma mailbox elegível
+      security: [{ graphApp: [] }]
+      parameters: [{ name: user-id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: Coleção OData; value vazio é resposta válida, content: { application/json: { schema: { $ref: '#/components/schemas/MessageRuleCollection' } } } }, '403': { description: Sem MailboxSettings.Read }, '404': { description: Mailbox não aplicável ou inexistente } }
+  /api/machines:
+    servers: [{ url: https://api.security.microsoft.com }]
+    get:
+      summary: Lista máquinas conhecidas pelo Microsoft Defender for Endpoint
+      security: [{ defenderApp: [] }]
+      parameters: [{ name: '$top', in: query, schema: { type: integer, minimum: 1, maximum: 10000 } }, { name: '$skip', in: query, schema: { type: integer, minimum: 0 } }]
+      responses: { '200': { description: Coleção paginável de máquinas Defender, content: { application/json: { schema: { $ref: '#/components/schemas/DefenderMachineCollection' } } } }, '403': { description: Restrição observada; requer token Defender e Machine.Read.All } }
+components:
+  securitySchemes:
+    graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token', scopes: { 'https://graph.microsoft.com/.default': Permissões Microsoft Graph associadas } } } }
+    defenderApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token', scopes: { 'https://api.security.microsoft.com/.default': Machine.Read.All e permissões Defender associadas } } } }
+  schemas:
+    SecureScoreCollection:
+      type: object
+      example: { '@odata.context': '…#security/secureScores', value: [{ id: score-id, currentScore: 42.5, maxScore: 100 }] }
+      required: [value]
+      properties:
+        '@odata.context': { type: string }
+        '@odata.nextLink': { type: string }
+        value: { type: array, items: { $ref: '#/components/schemas/SecureScore' } }
+    SecureScore:
+      type: object
+      properties:
+        id: { type: string }
+        azureTenantId: { type: [string, 'null'] }
+        createdDateTime: { type: [string, 'null'], format: date-time }
+        currentScore: { type: [number, 'null'] }
+        maxScore: { type: [number, 'null'] }
+        activeUserCount: { type: [integer, 'null'] }
+        licensedUserCount: { type: [integer, 'null'] }
+        enabledServices: { type: array, items: { type: string } }
+        averageComparativeScores: { type: array, items: { $ref: '#/components/schemas/AverageComparativeScore' } }
+        controlScores: { type: array, items: { $ref: '#/components/schemas/ControlScore' } }
+    ControlScore:
+      type: object
+      properties:
+        controlCategory: { type: [string, 'null'] }
+        controlName: { type: [string, 'null'] }
+        description: { type: [string, 'null'] }
+        score: { type: [number, 'null'] }
+        lastSynced: { type: [string, 'null'], format: date-time }
+        implementationStatus: { type: [string, 'null'] }
+        scoreInPercentage: { type: [number, 'null'] }
+        on: { type: [boolean, 'null'] }
+        count: { type: [integer, 'null'] }
+        total: { type: [integer, 'null'] }
+    AverageComparativeScore:
+      type: object
+      properties:
+        basis: { type: [string, 'null'] }
+        averageScore: { type: [number, 'null'] }
+        appsScore: { type: [number, 'null'] }
+        appsScoreMax: { type: [number, 'null'] }
+        dataScore: { type: [number, 'null'] }
+        dataScoreMax: { type: [number, 'null'] }
+        deviceScore: { type: [number, 'null'] }
+        deviceScoreMax: { type: [number, 'null'] }
+        identityScore: { type: [number, 'null'] }
+        identityScoreMax: { type: [number, 'null'] }
+        infrastructureScore: { type: [number, 'null'] }
+        infrastructureScoreMax: { type: [number, 'null'] }
+    ManagedDeviceCollection:
+      type: object
+      example: { '@odata.context': '…#deviceManagement/managedDevices', value: [{ id: device-id, azureADDeviceId: entra-device-id, complianceState: noncompliant, partnerReportedThreatState: activated, lastSyncDateTime: '2026-08-14T12:00:00Z' }] }
+      required: [value]
+      properties: { '@odata.nextLink': { type: string }, value: { type: array, items: { type: object, properties: { id: { type: string }, azureADDeviceId: { type: [string, 'null'] }, complianceState: { type: [string, 'null'] }, partnerReportedThreatState: { type: [string, 'null'] }, lastSyncDateTime: { type: [string, 'null'], format: date-time } } } } }
+    SiteCollection:
+      type: object
+      example: { value: [{ id: site-id, name: Site-A, webUrl: 'https://tenant.sharepoint.com/sites/site-a', isPersonalSite: false }], '@odata.nextLink': opaque-url-with-skiptoken }
+      required: [value]
+      properties: { '@odata.nextLink': { type: string }, value: { type: array, items: { type: object, properties: { id: { type: string }, name: { type: [string, 'null'] }, displayName: { type: [string, 'null'] }, webUrl: { type: [string, 'null'], format: uri }, isPersonalSite: { type: [boolean, 'null'] }, createdDateTime: { type: [string, 'null'], format: date-time } } } } }
+    SitePermissionCollection:
+      type: object
+      example: { value: [{ id: permission-id, roles: [reader], grantedTo: { user: { id: user-id, displayName: Redacted } } }] }
+      required: [value]
+      properties: { '@odata.nextLink': { type: string }, value: { type: array, items: { $ref: '#/components/schemas/SitePermission' } } }
+    SitePermission:
+      type: object
+      properties: { id: { type: string }, roles: { type: array, items: { type: string } }, grantedTo: { type: object, additionalProperties: true }, grantedToIdentities: { type: array, items: { type: object, additionalProperties: true } }, sharePointIds: { type: object, additionalProperties: true } }
+    SharePointSettings:
+      type: object
+      example: { id: settings-id, sharingCapability: externalUserAndGuestSharing, sharingDomainRestrictionMode: allowList }
+      properties: { id: { type: [string, 'null'] }, sharingCapability: { type: [string, 'null'] }, sharingDomainRestrictionMode: { type: [string, 'null'] }, sharingAllowedDomainList: { type: array, items: { type: string } }, sharingBlockedDomainList: { type: array, items: { type: string } }, isResharingByExternalUsersEnabled: { type: [boolean, 'null'] }, isUnmanagedSyncAppForTenantRestricted: { type: [boolean, 'null'] } }
+    MessageRuleCollection:
+      type: object
+      example: { '@odata.context': '…#messageRules', value: [{ id: rule-id, displayName: External-forward, sequence: 1, isEnabled: true, actions: { forwardTo: [{ emailAddress: { address: 'external@example.invalid' } }] } }] }
+      required: [value]
+      properties: { '@odata.nextLink': { type: string }, value: { type: array, items: { type: object, properties: { id: { type: string }, displayName: { type: [string, 'null'] }, sequence: { type: [integer, 'null'] }, isEnabled: { type: [boolean, 'null'] }, hasError: { type: [boolean, 'null'] }, isReadOnly: { type: [boolean, 'null'] }, conditions: { type: object, additionalProperties: true }, exceptions: { type: object, additionalProperties: true }, actions: { $ref: '#/components/schemas/MessageRuleActions' } } } } }
+    MessageRuleActions:
+      type: object
+      properties: { forwardTo: { type: array, items: { $ref: '#/components/schemas/Recipient' } }, forwardAsAttachmentTo: { type: array, items: { $ref: '#/components/schemas/Recipient' } }, redirectTo: { type: array, items: { $ref: '#/components/schemas/Recipient' } } }
+    Recipient:
+      type: object
+      properties: { emailAddress: { type: object, properties: { name: { type: [string, 'null'] }, address: { type: [string, 'null'], format: email } } } }
+    DefenderMachineCollection:
+      type: object
+      example: { '@odata.context': '…#Machines', value: [{ id: machine-id, computerDnsName: 'device.example.invalid', onboardingStatus: onboarded, healthStatus: Active, riskScore: Low, aadDeviceId: entra-device-id }] }
+      required: [value]
+      properties: { '@odata.context': { type: string }, '@odata.nextLink': { type: string }, value: { type: array, items: { type: object, properties: { id: { type: string }, computerDnsName: { type: [string, 'null'] }, firstSeen: { type: [string, 'null'], format: date-time }, lastSeen: { type: [string, 'null'], format: date-time }, osPlatform: { type: [string, 'null'] }, aadDeviceId: { type: [string, 'null'] }, onboardingStatus: { type: [string, 'null'] }, healthStatus: { type: [string, 'null'] }, riskScore: { type: [string, 'null'] }, exposureLevel: { type: [string, 'null'] }, machineTags: { type: array, items: { type: string } }, ipAddresses: { type: array, items: { type: object, additionalProperties: true } } } } } }

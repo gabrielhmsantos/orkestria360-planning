@@ -1,0 +1,7 @@
+interface:
+  display_name: "Frontend Contract Fixtures"
+  short_description: "Crie fixtures JSON do contrato de UI"
+  default_prompt: "Use $frontend-contract-fixtures para criar fixtures JSON sintéticos e rastreáveis de uma superfície data-backed já mapeada."
+
+policy:
+  allow_implicit_invocation: true

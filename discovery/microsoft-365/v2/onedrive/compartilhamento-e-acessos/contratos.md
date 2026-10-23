@@ -1,0 +1,28 @@
+# Compartilhamento e Acessos — Contrato semântico inicial
+
+## Shape e semântica
+
+- `trendPeriod`: janela fixa dos últimos 12 meses, com série mensal ordenada.
+- `recordsPeriod`: janela fixa de 30 dias, com início e fim inclusivos, para registros recentes, risco, alertas e recomendações.
+- `sharingSummary`: sete métricas opcionais — itens compartilhados, exposição externa, links anônimos, links com edição, convidados, alto risco e links sem expiração — cada uma com valor atual e comparação explícita com o snapshot de 30 dias antes. Baseline ausente ou `null` comunica comparação não publicada; `previousValue: 0` é factual, mantém o contexto D30 e normaliza a variação como `valor atual × 100%`.
+- `filters`: catálogos tipados de tipo de compartilhamento, risco, modo de acesso, domínio e proprietário. Os valores são compatíveis com `sharingRecords` e não são inferidos pelos rótulos visuais.
+- `sharingRecords`: coleção paginada com momento, item/pasta, proprietário, tipo tipado, destinatário opcional, domínio opcional, modo de acesso tipado, tipo/escopo de link, expiração discriminada (`scheduled`, `none` ou `notPublished`), último acesso opcional, risco tipado anulável e evidências opcionais de domínio bloqueado/conteúdo sensível.
+- `sharingTypeDistribution`: distribuição exclusiva de arquivos atuais compartilhados classificados. Cada arquivo conta uma vez, na primeira categoria confirmada da precedência Links anônimos > Convidados externos > Aplicativos/Integrações > Organização (interno) > Pessoas específicas. O denominador é a quantidade de arquivos compartilhados classificados; soma das fatias = denominador. Publicar cobertura de elegíveis/avaliados/classificados/desconhecidos, sem incluir pastas, cópias de preservação ou duplicações remotas. Participação = `100 × quantidade / denominador`, com duas casas decimais, half-up, sem ajuste artificial de soma arredondada. Zero factual produz composição vazia; ausência de classificação suficiente não produz cinco zeros. A ordem é de apresentação, independente do riscoR2. O KPI mantém unidade de arquivos únicos e cobertura própria. Os 12 itens da fixture são exemplo sintético; não são cardinalidade fixa do produto. *(C1 aceita A; usuário, 2026-10-14.)*
+- `externalTrend`: série mensal cronológica de 12 pontos, com `sharedItems` e `guestRecipients`; cada série pode usar seu próprio eixo no gráfico combinado, sem recálculo pela interface.
+- `riskDistribution`: distribuição dos compartilhamentos classificados, na ordem Crítico, Alto, Médio, Baixo e Informativo. `Não classificado` não integra a composição do sponsor.
+- `externalDomains`: ranking factual de até cinco domínios externos, ordenado por quantidade; a participação é publicada, mas a tabela de insight exibe somente domínio e itens.
+- `alerts`: cinco itens de investigação com `label`, `value`, `icon { family, tone }` e `relatedRecordIds`; o valor do recorte é a contagem de relações ainda visíveis, sem fabricar alerta quando não houver relação selecionada.
+- `recommendations`: cinco itens somente leitura com ícone, prioridade finita localizada na UI e `relatedRecordIds`; não publicam destino, handler ou ação mutável.
+
+## Comportamento observável
+
+- **Risco residual R2:** Baixo requer compartilhamento restrito/revisado, destinatário autorizado e leitura; quando externo, expiração factual<=30 dias. Não presume revisão nem autorização. Encerramento comprovado sem exposição remanescente pode ser Informativo. Avaliar primeiro regras superiores do DOCX; contexto insuficiente permanece nulo. Fonte histórica não prova situação atual. Distribuição inclui somente classificados e declara cobertura; população>0 sem classificados não vira cinco zeros. Comparações exigem mesma revisão de regras. *(Usuário, 2026-10-14.)*
+
+- **Cobertura inicial definida:** todos os drives empresariais elegíveis integram o universo de conteúdo; permissões atuais dos compartilhados mantêm cobertura/frescor próprios. Enquanto houver drive ou item pendente, não declarar completude global. Série mensal mantém 12 posições, com meses não coletados sem valor, zero só com leitura íntegra e comparação D30 só com baseline factual. Criar compartilhamento em evento antigo não confirma exposição atualmente ativa. *(Clarificação 5, inferência autorizada pelo usuário, 2026-10-14.)*
+
+- Busca por item, proprietário ou destinatário, tipo, risco, modo de acesso, domínio e proprietário atualizam `sharingRecords`, alertas e recomendações relacionados. KPIs e análises superiores permanecem snapshots publicados e não são recalculados.
+- A faixa final usa a tabela `Compartilhamentos Recentes` em nove colunas de grid e um aside de três colunas com `Alertas de Compartilhamento` e `Ações Recomendadas`. No desktop, os cards ocupam duas linhas reais do aside; no tablet ficam lado a lado abaixo da tabela e no mobile empilham.
+- KPIs permanecem snapshots D30 independentes: filtros, paginação e o recorte de registros não os recalculam. Itens compartilhados não excedem Arquivos Totais no mesmo snapshot; os demais KPIs são propriedades sobrepostas e não devem ser somados entre si.
+- Risco é uma classificação de investigação; registros sem evidência suficiente ficam sem classificação, não com risco baixo.
+- Os quatro cards de análise exibem a ordem `Compartilhamentos por Tipo`, `Compartilhamentos Externos (Últimos 12 meses)`, `Compartilhamentos por Nível de Risco` e `Top Domínios Externos`. O CTA de domínios é somente texto visual enquanto não houver destino publicado.
+- Ações mutáveis não são expostas como disponíveis no MVP. Estado de fonte insuficiente usa painel de disponibilidade, não uma coleção vazia.

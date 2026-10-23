@@ -1,0 +1,99 @@
+openapi: 3.1.0
+info:
+  title: Microsoft Graph - Exemplo de colecao OData
+  version: v1
+servers:
+  - url: https://graph.microsoft.com/v1.0
+paths:
+  /exampleResources:
+    get:
+      summary: Lista recursos de exemplo
+      description: Leitura Graph sem corpo; a colecao pode ter pagina seguinte.
+      security:
+        - graphApp: [Example.Read.All]
+      parameters:
+        - $ref: '#/components/parameters/Top'
+        - $ref: '#/components/parameters/Select'
+      responses:
+        '200':
+          description: Envelope OData com recursos de exemplo.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExampleResourceCollection'
+        '400':
+          $ref: '#/components/responses/GraphError'
+        '401':
+          $ref: '#/components/responses/GraphError'
+        '403':
+          $ref: '#/components/responses/GraphError'
+        '429':
+          description: Throttling Microsoft Graph.
+          headers:
+            Retry-After:
+              schema: { type: integer, minimum: 0 }
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphError'
+components:
+  securitySchemes:
+    graphApp:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token
+          scopes:
+            https://graph.microsoft.com/.default: Consentimentos Microsoft Graph
+  parameters:
+    Top:
+      name: $top
+      in: query
+      schema: { type: integer, minimum: 1 }
+    Select:
+      name: $select
+      in: query
+      schema: { type: string }
+  responses:
+    GraphError:
+      description: Erro Microsoft Graph sanitizado no discovery.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GraphError'
+  schemas:
+    GraphError:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: { type: string }
+            message: { type: string }
+            innerError: { type: object, additionalProperties: true }
+    ExampleResourceCollection:
+      type: object
+      required: [value]
+      properties:
+        '@odata.context': { type: string }
+        '@odata.nextLink': { type: string, format: uri }
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExampleResource'
+    ExampleResource:
+      type: object
+      required: [id, displayName]
+      properties:
+        id: { type: string }
+        displayName: { type: string }
+        createdDateTime: { type: string, format: date-time }
+        enabled: { type: boolean }
+        tags:
+          type: array
+          items: { type: string }
+        metadata:
+          type: object
+          additionalProperties: true

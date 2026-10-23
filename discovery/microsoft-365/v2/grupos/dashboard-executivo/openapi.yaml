@@ -1,0 +1,19 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — Dashboard de Grupos, version: v1 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /groups:
+    get:
+      summary: Catálogo para composição e indicadores
+      description: Sem corpo. $count/$search e filtros avançados exigem ConsistencyLevel eventual.
+      security: [{ graphApp: [] }]
+      responses: { '200': { $ref: '#/components/responses/groups' }, '403': { $ref: '#/components/responses/restricted' }, '429': { $ref: '#/components/responses/throttled' } }
+components:
+  securitySchemes: { graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token', scopes: { 'https://graph.microsoft.com/.default': Group.Read.All } } } } }
+  responses:
+    groups: { description: Coleção OData de grupos, content: { application/json: { schema: { $ref: '#/components/schemas/GroupCollection' } } } }
+    restricted: { description: Sem consentimento ou propriedade restrita }
+    throttled: { description: Throttling; respeitar Retry-After }
+  schemas:
+    GroupCollection: { type: object, required: [value], properties: { '@odata.context': { type: string }, value: { type: array, items: { $ref: '#/components/schemas/Group' } }, '@odata.nextLink': { type: [string, 'null'] } } }
+    Group: { type: object, required: [id], properties: { id: { type: string }, displayName: { type: [string, 'null'], x-pii: true }, groupTypes: { type: array, items: { type: string } }, securityEnabled: { type: [boolean, 'null'] }, onPremisesSyncEnabled: { type: [boolean, 'null'] }, resourceProvisioningOptions: { type: array, items: { type: string } }, assignedLicenses: { type: array, items: { type: object } } } }

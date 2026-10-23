@@ -1,0 +1,11 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — Risco de identidade, version: v1 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /identityProtection/riskyUsers:
+    get: { summary: Usuários em risco, security: [{ graphApp: [IdentityRiskyUser.Read.All] }], parameters: [{ name: '$top', in: query, schema: { type: integer, maximum: 500 } }], responses: { '200': { description: Coleção OData de riskyUser }, '403': { description: 'Restrito por licença Entra ID P2; permission presente no token e resposta observada no tenant' }, '429': { description: Throttling; respeitar Retry-After } } }
+  /identityProtection/riskDetections:
+    get: { summary: 'Detecções de risco; 403 por licença ausente no tenant', security: [{ graphApp: [IdentityRiskEvent.Read.All] }], responses: { '200': { description: Coleção OData de riskDetection }, '403': { description: 'Restrito por licença Entra ID P2; permission presente no token' } } }
+  /identityProtection/riskyUsers/{user-id}/history:
+    get: { summary: 'Histórico de risco; 403 por licença ausente no tenant', security: [{ graphApp: [IdentityRiskyUser.Read.All] }], parameters: [{ name: user-id, in: path, required: true, schema: { type: string } }], responses: { '200': { description: Coleção OData }, '403': { description: 'Restrito por licença Entra ID P2; permission presente no token' }, '404': { description: Usuário inexistente } } }
+components: { securitySchemes: { graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token', scopes: { 'https://graph.microsoft.com/.default': Consentimentos Identity Protection } } } } } }

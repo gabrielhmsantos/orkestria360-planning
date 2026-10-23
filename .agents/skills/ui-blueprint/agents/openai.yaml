@@ -1,0 +1,13 @@
+interface:
+  display_name: "UI Blueprint"
+  short_description: "Decida e especifique UI implementável a partir do Discovery"
+  default_prompt: "Use $ui-blueprint para decidir e justificar a composição, responsabilidades e ownership de dados/estado da UI e produzir um handoff implementável, verificando no Storybook as APIs existentes."
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "storybook"
+      description: "Catálogo Storybook em execução para APIs e previews verificados de componentes."
+
+policy:
+  allow_implicit_invocation: true

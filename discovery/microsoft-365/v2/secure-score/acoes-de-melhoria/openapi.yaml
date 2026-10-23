@@ -1,0 +1,52 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — Secure Score Control Profiles, version: v1.0 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /security/secureScoreControlProfiles:
+    get:
+      summary: Lista catálogo de perfis de controles Secure Score
+      security: [{ graphApp: [] }]
+      parameters:
+        - { name: '$top', in: query, schema: { type: integer, minimum: 1 } }
+        - { name: '$skip', in: query, schema: { type: integer, minimum: 0 } }
+        - { name: '$filter', in: query, schema: { type: string } }
+        - { name: '$count', in: query, schema: { type: boolean } }
+      responses:
+        '200': { description: Coleção OData de perfis, content: { application/json: { schema: { $ref: '#/components/schemas/ProfileCollection' } } } }
+        '401': { description: Token ausente ou inválido }
+        '403': { description: Sem SecurityEvents.Read.All ou consentimento }
+        '429': { description: Throttling; observar Retry-After }
+components:
+  securitySchemes: { graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token', scopes: { 'https://graph.microsoft.com/.default': SecurityEvents.Read.All e consentimentos associados } } } } }
+  schemas:
+    ProfileCollection:
+      type: object
+      example: { '@odata.context': '…#security/secureScoreControlProfiles', value: [{ id: control-id, title: Example-control, controlCategory: Identity, maxScore: 5, rank: 10, implementationCost: low, userImpact: low, threats: [Credential-theft] }] }
+      required: [value]
+      properties:
+        '@odata.context': { type: string }
+        '@odata.nextLink': { type: string }
+        value: { type: array, items: { $ref: '#/components/schemas/Profile' } }
+    Profile:
+      type: object
+      properties:
+        id: { type: string }
+        azureTenantId: { type: [string, 'null'] }
+        actionType: { type: [string, 'null'] }
+        title: { type: [string, 'null'] }
+        controlCategory: { type: [string, 'null'] }
+        maxScore: { type: [number, 'null'] }
+        rank: { type: [number, 'null'] }
+        implementationCost: { type: [string, 'null'] }
+        userImpact: { type: [string, 'null'] }
+        threats: { type: array, items: { type: string } }
+        remediation: { type: [string, 'null'] }
+        actionUrl: { type: [string, 'null'], format: uri }
+        service: { type: [string, 'null'] }
+        deprecated: { type: [boolean, 'null'] }
+        lastModifiedDateTime: { type: [string, 'null'], format: date-time }
+        remediationImpact: { type: [string, 'null'] }
+        tier: { type: [string, 'null'] }
+        vendorInformation: { type: object, additionalProperties: true }
+        complianceInformation: { type: array, items: { type: object, additionalProperties: true } }
+        controlStateUpdates: { type: array, items: { type: object, additionalProperties: true } }

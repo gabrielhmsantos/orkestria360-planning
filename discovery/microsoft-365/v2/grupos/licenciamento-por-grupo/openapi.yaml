@@ -1,0 +1,32 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — Licenciamento por Grupo, version: v1 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /groups:
+    get:
+      summary: Grupos com assignedLicenses; sem corpo
+      security: [{ graphApp: [] }]
+      parameters: [{ name: '$filter', in: query, schema: { type: string, example: 'assignedLicenses/any()' } }, { name: '$select', in: query, schema: { type: string } }]
+      responses: { '200': { $ref: '#/components/responses/groups' }, '403': { description: Fonte restrita }, '429': { description: Respeitar Retry-After } }
+  /groups/{group-id}/membersWithLicenseErrors:
+    get:
+      summary: Membros com erro de licença; sem corpo
+      security: [{ graphApp: [] }]
+      parameters: [{ $ref: '#/components/parameters/groupId' }]
+      responses: { '200': { $ref: '#/components/responses/objects' }, '403': { description: Fonte restrita }, '404': { description: Grupo ausente } }
+  /users/{user-id}:
+    get:
+      summary: Origem de licença do usuário; sem corpo
+      security: [{ graphApp: [] }]
+      parameters: [{ $ref: '#/components/parameters/userId' }, { name: '$select', in: query, schema: { type: string, example: 'id,displayName,licenseAssignmentStates' } }]
+      responses: { '200': { description: User com licenseAssignmentStates, content: { application/json: { schema: { $ref: '#/components/schemas/User' } } } }, '403': { description: Sem User.Read.All }, '404': { description: Usuário ausente } }
+components:
+  securitySchemes: { graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token', scopes: { 'https://graph.microsoft.com/.default': 'Group.Read.All, GroupMember.Read.All e User.Read.All' } } } } }
+  parameters: { groupId: { name: group-id, in: path, required: true, schema: { type: string } }, userId: { name: user-id, in: path, required: true, schema: { type: string } } }
+  responses:
+    groups: { description: Coleção OData; value vazio pode ser filtro sem correspondências, content: { application/json: { schema: { $ref: '#/components/schemas/Groups' } } } }
+    objects: { description: Coleção OData de directoryObject, content: { application/json: { schema: { $ref: '#/components/schemas/Objects' } } } }
+  schemas:
+    Groups: { type: object, required: [value], properties: { '@odata.context': { type: string }, value: { type: array, items: { type: object, required: [id], properties: { id: { type: string }, displayName: { type: [string, 'null'], x-pii: true }, assignedLicenses: { type: array, items: { type: object, properties: { skuId: { type: string }, disabledPlans: { type: array, items: { type: string } } } } }, licenseProcessingState: { type: [string, object, 'null'] } } } }, '@odata.nextLink': { type: [string, 'null'] } } }
+    Objects: { type: object, required: [value], properties: { value: { type: array, items: { type: object, additionalProperties: true } }, '@odata.nextLink': { type: [string, 'null'] } } }
+    User: { type: object, required: [id], properties: { id: { type: string }, displayName: { type: [string, 'null'], x-pii: true }, licenseAssignmentStates: { type: array, items: { type: object, properties: { skuId: { type: string }, state: { type: [string, 'null'] }, error: { type: [string, 'null'] }, assignedByGroup: { type: [string, 'null'], x-pii: true }, lastUpdatedDateTime: { type: [string, 'null'], format: date-time } } } } } }

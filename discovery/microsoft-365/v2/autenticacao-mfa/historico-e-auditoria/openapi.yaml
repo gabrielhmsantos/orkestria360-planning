@@ -1,0 +1,7 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — Auditoria MFA, version: v1 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /auditLogs/directoryAudits:
+    get: { summary: Auditoria de diretório por janela, security: [{ graphApp: [AuditLog.Read.All] }], parameters: [{ name: '$top', in: query, schema: { type: integer, maximum: 999 } }, { name: '$filter', in: query, schema: { type: string, example: 'activityDateTime ge {start} and activityDateTime lt {end}' } }, { name: '$orderby', in: query, schema: { type: string } }], responses: { '200': { description: Coleção OData validada no tenant }, '403': { description: Fonte restrita }, '429': { description: Throttling; respeitar Retry-After } } }
+components: { securitySchemes: { graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token', scopes: { 'https://graph.microsoft.com/.default': AuditLog.Read.All } } } } } }

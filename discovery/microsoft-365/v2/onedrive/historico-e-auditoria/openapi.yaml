@@ -1,0 +1,81 @@
+openapi: 3.1.0
+info: { title: Office 365 Management Activity API — OneDrive audit, version: v1.0 }
+servers: [{ url: 'https://manage.office.com' }]
+paths:
+  /api/v1.0/{tenant-id}/activity/feed/subscriptions/start:
+    post:
+      summary: Controle técnico para habilitar subscription do feed
+      security: [{ managementApp: [ActivityFeed.Read] }]
+      parameters:
+        - { name: tenant-id, in: path, required: true, schema: { type: string } }
+        - { name: contentType, in: query, required: true, schema: { type: string, enum: [Audit.SharePoint, Audit.General] } }
+        - { name: PublisherIdentifier, in: query, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200': { description: Subscription habilitada; observado para Audit.SharePoint e Audit.General., x-observed: true, content: { application/json: { schema: { $ref: '#/components/schemas/Subscription' } } } }
+        '401': { $ref: '#/components/responses/ActivityError' }
+        '403': { $ref: '#/components/responses/ActivityError' }
+        '429': { $ref: '#/components/responses/ActivityError' }
+  /api/v1.0/{tenant-id}/activity/feed/subscriptions/list:
+    get:
+      summary: Lista subscriptions atuais do feed
+      security: [{ managementApp: [ActivityFeed.Read] }]
+      parameters:
+        - { name: tenant-id, in: path, required: true, schema: { type: string } }
+        - { name: PublisherIdentifier, in: query, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200': { description: Lista confirmou Audit.SharePoint e Audit.General habilitadas e sem webhook após start., x-observed: true, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Subscription' } } } } }
+        '401': { $ref: '#/components/responses/ActivityError' }
+        '403': { $ref: '#/components/responses/ActivityError' }
+        '429': { $ref: '#/components/responses/ActivityError' }
+  /api/v1.0/{tenant-id}/activity/feed/subscriptions/content:
+    get:
+      summary: Lista blobs de auditoria disponíveis
+      security: [{ managementApp: [ActivityFeed.Read] }]
+      parameters:
+        - { name: tenant-id, in: path, required: true, schema: { type: string } }
+        - { name: contentType, in: query, required: true, schema: { type: string, enum: [Audit.SharePoint, Audit.General] } }
+        - { name: startTime, in: query, required: false, description: Use junto com endTime; janela máxima 24 horas e início no máximo 7 dias atrás., schema: { type: string, format: date-time } }
+        - { name: endTime, in: query, required: false, description: Use junto com startTime., schema: { type: string, format: date-time } }
+        - { name: PublisherIdentifier, in: query, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200': { description: Descritores de blobs disponíveis; observado para Audit.SharePoint e Audit.General., x-observed: true, headers: { NextPageUri: { schema: { type: string, format: uri } } }, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/ContentBlob' } } } } }
+        '400': { $ref: '#/components/responses/ActivityError' }
+        '401': { $ref: '#/components/responses/ActivityError' }
+        '403': { $ref: '#/components/responses/ActivityError' }
+        '429': { $ref: '#/components/responses/ActivityError' }
+  /api/v1.0/{tenant-id}/activity/feed/audit/{content-id}:
+    get:
+      summary: Recupera conteúdo por contentUri opaca
+      security: [{ managementApp: [ActivityFeed.Read] }]
+      parameters:
+        - { name: tenant-id, in: path, required: true, schema: { type: string } }
+        - { name: content-id, in: path, required: true, schema: { type: string } }
+        - { name: PublisherIdentifier, in: query, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200':
+          description: >-
+            A Microsoft documenta JSON. Uma leitura de contentUri por content type
+            retornou array JSON com Content-Type text/plain; charset=utf-8.
+          x-observed: true
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/AuditEvent' } }
+            text/plain:
+              schema:
+                type: string
+                description: >-
+                  Corpo observado como texto JSON codificado; decodificar como
+                  array de AuditEvent antes do mapping.
+        '401': { $ref: '#/components/responses/ActivityError' }
+        '403': { $ref: '#/components/responses/ActivityError' }
+        '404': { $ref: '#/components/responses/ActivityError' }
+        '429': { $ref: '#/components/responses/ActivityError' }
+components:
+  securitySchemes:
+    managementApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token', scopes: { ActivityFeed.Read: Read the Office 365 activity feed } } } }
+  responses: { ActivityError: { description: Erro da Management Activity API, content: { application/json: { schema: { $ref: '#/components/schemas/ActivityError' } } } } }
+  schemas:
+    Subscription: { type: object, required: [contentType, status], properties: { contentType: { type: string }, status: { type: string }, webhook: { type: [object, 'null'] } } }
+    ContentBlob: { type: object, required: [contentType, contentId, contentUri, contentCreated, contentExpiration], properties: { contentType: { type: string }, contentId: { type: string }, contentUri: { type: string, format: uri }, contentCreated: { type: string, format: date-time }, contentExpiration: { type: string, format: date-time } } }
+    ActivityError: { type: object, properties: { error: { type: object, additionalProperties: true } }, additionalProperties: true }
+    AuditEvent: { type: object, required: [Id, RecordType, CreationTime, Operation, OrganizationId], properties: { Id: { type: string }, RecordType: { type: [integer, string] }, CreationTime: { type: string, format: date-time }, Operation: { type: string }, OrganizationId: { type: string, format: uuid }, Workload: { type: string } }, additionalProperties: true }

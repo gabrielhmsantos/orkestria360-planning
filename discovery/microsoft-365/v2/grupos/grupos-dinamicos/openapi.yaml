@@ -1,0 +1,14 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — Grupos Dinâmicos, version: v1 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /groups:
+    get:
+      summary: Filtra grupos DynamicMembership; sem corpo
+      security: [{ graphApp: [] }]
+      parameters: [{ name: '$filter', in: query, schema: { type: string, example: "groupTypes/any(c:c eq 'DynamicMembership')" } }, { name: '$select', in: query, schema: { type: string } }, { name: ConsistencyLevel, in: header, schema: { type: string, enum: [eventual] } }]
+      responses: { '200': { $ref: '#/components/responses/groups' }, '400': { description: Restrito quando a licença dinâmica/Premium não estiver disponível }, '403': { description: Sem Group.Read.All }, '429': { description: Respeitar Retry-After } }
+components:
+  securitySchemes: { graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token', scopes: { 'https://graph.microsoft.com/.default': Group.Read.All } } } } }
+  responses: { groups: { description: Coleção OData paginável; value vazio é sem correspondências até confirmação, content: { application/json: { schema: { $ref: '#/components/schemas/Groups' } } } } }
+  schemas: { Groups: { type: object, required: [value], properties: { '@odata.context': { type: string }, value: { type: array, items: { type: object, required: [id], properties: { id: { type: string }, displayName: { type: [string, 'null'], x-pii: true }, groupTypes: { type: array, items: { type: string } }, membershipRule: { type: [string, 'null'], x-pii: true }, membershipRuleProcessingState: { type: [string, 'null'] }, createdDateTime: { type: [string, 'null'], format: date-time } } } }, '@odata.nextLink': { type: [string, 'null'] } } } }

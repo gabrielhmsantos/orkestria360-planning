@@ -1,0 +1,15 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — Cobertura MFA, version: v1 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /reports/authenticationMethods/userRegistrationDetails:
+    get: { summary: Registro MFA em massa, security: [{ graphApp: [AuditLog.Read.All] }], parameters: [{ name: '$top', in: query, schema: { type: integer, maximum: 500 } }, { name: '$filter', in: query, schema: { type: string } }], responses: { '200': { $ref: '#/components/responses/registrations' }, '403': { $ref: '#/components/responses/restricted' }, '429': { $ref: '#/components/responses/throttled' } } }
+components:
+  securitySchemes: { graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token', scopes: { 'https://graph.microsoft.com/.default': Consentimento Microsoft Graph } } } } }
+  responses:
+    registrations: { description: 'Coleção OData; 200 validado no tenant de desenvolvimento', content: { application/json: { schema: { $ref: '#/components/schemas/RegistrationCollection' } } } }
+    restricted: { description: 'Fonte restrita por licença, permissão ou consentimento' }
+    throttled: { description: 'Throttling; respeitar Retry-After', headers: { Retry-After: { schema: { type: integer } } } }
+  schemas:
+    RegistrationCollection: { type: object, required: [value], properties: { '@odata.context': { type: string }, '@odata.nextLink': { type: string }, value: { type: array, items: { $ref: '#/components/schemas/UserRegistrationDetail' } } } }
+    UserRegistrationDetail: { type: object, required: [id], properties: { id: { type: string }, userPrincipalName: { type: [string, 'null'] }, userDisplayName: { type: [string, 'null'] }, userType: { type: [string, 'null'] }, isAdmin: { type: [boolean, 'null'] }, isMfaRegistered: { type: [boolean, 'null'] }, isMfaCapable: { type: [boolean, 'null'] }, isPasswordlessCapable: { type: [boolean, 'null'] }, methodsRegistered: { type: array, items: { type: string } }, lastUpdatedDateTime: { type: [string, 'null'], format: date-time } } }

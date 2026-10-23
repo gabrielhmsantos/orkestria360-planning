@@ -1,0 +1,17 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — Métodos de autenticação, version: v1 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /reports/authenticationMethods/userRegistrationDetails:
+    get: { summary: Registro de métodos em massa, security: [{ graphApp: [AuditLog.Read.All] }], responses: { '200': { description: Coleção OData de userRegistrationDetails }, '403': { description: Fonte restrita } } }
+  /users/{user-id}/authentication/methods:
+    get: { summary: Métodos de um usuário, description: 'Investigação individual; 200 observado no tenant após consentimento de UserAuthenticationMethod.Read.All.', security: [{ graphApp: [UserAuthenticationMethod.Read.All] }], parameters: [{ name: user-id, in: path, required: true, schema: { type: string } }], responses: { '200': { description: 'Coleção OData heterogênea; passwordAuthenticationMethod, phoneAuthenticationMethod e microsoftAuthenticatorAuthenticationMethod observados.' }, '403': { description: Fonte restrita por permissão/consentimento }, '404': { description: Usuário inexistente } } }
+  /users/{user-id}/authentication/phoneMethods:
+    get: { summary: Métodos de telefone do usuário, description: 'Leitura complementar para phoneType e smsSignInState; 200 observado no tenant após consentimento.', security: [{ graphApp: [UserAuthenticationMethod.Read.All] }], parameters: [{ name: user-id, in: path, required: true, schema: { type: string } }], responses: { '200': { description: 'Coleção OData de phoneAuthenticationMethod; phoneType mobile e smsSignInState notAllowedByPolicy observados; campos PII omitidos.' }, '403': { description: Fonte restrita por permissão/consentimento }, '404': { description: Usuário inexistente } } }
+  /policies/authenticationMethodsPolicy:
+    get: { summary: Política de métodos, description: '200 JSON observado no tenant.', security: [{ graphApp: [Policy.Read.AuthenticationMethod] }], responses: { '200': { description: Entidade authenticationMethodsPolicy }, '403': { description: Fonte restrita } } }
+  /policies/authenticationMethodsPolicy/authenticationMethodConfigurations/sms:
+    get: { summary: Política SMS, description: '200 observado: smsAuthenticationMethodConfiguration, state disabled.', security: [{ graphApp: [Policy.Read.AuthenticationMethod] }], responses: { '200': { description: 'Configuração SMS com state e alvos.' }, '403': { description: Fonte restrita por permissão/consentimento } } }
+  /policies/authenticationMethodsPolicy/authenticationMethodConfigurations/voice:
+    get: { summary: Política de ligação, description: '200 observado: voiceAuthenticationMethodConfiguration, state disabled e isOfficePhoneAllowed false.', security: [{ graphApp: [Policy.Read.AuthenticationMethod] }], responses: { '200': { description: 'Configuração de ligação com state, alvos e isOfficePhoneAllowed.' }, '403': { description: Fonte restrita por permissão/consentimento } } }
+components: { securitySchemes: { graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token', scopes: { 'https://graph.microsoft.com/.default': Consentimento Graph } } } } } }

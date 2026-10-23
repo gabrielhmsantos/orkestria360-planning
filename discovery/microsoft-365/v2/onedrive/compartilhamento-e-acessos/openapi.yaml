@@ -1,0 +1,39 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — OneDrive item permissions, version: v1.0 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /users/{user-id}/drive/items/{item-id}/permissions:
+    get:
+      summary: Lista permissões de um item do OneDrive
+      security: [{ graphApp: [Files.Read.All] }]
+      parameters:
+        - { name: user-id, in: path, required: true, schema: { type: string } }
+        - { name: item-id, in: path, required: true, schema: { type: string } }
+        - { name: $select, in: query, required: false, schema: { type: string } }
+        - { name: If-None-Match, in: header, required: false, schema: { type: string } }
+      responses:
+        '200': { description: Coleção OData de permissões, content: { application/json: { schema: { $ref: '#/components/schemas/PermissionCollection' } } } }
+        '304': { description: Sem alteração para o ETag informado }
+        '401': { $ref: '#/components/responses/GraphError' }
+        '403': { $ref: '#/components/responses/GraphError' }
+        '404': { $ref: '#/components/responses/GraphError' }
+        '429': { $ref: '#/components/responses/GraphError' }
+components:
+  securitySchemes: { graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token', scopes: { Files.Read.All: Le todos os arquivos } } } } }
+  responses: { GraphError: { description: Erro Microsoft Graph, content: { application/json: { schema: { $ref: '#/components/schemas/GraphError' } } } } }
+  schemas:
+    PermissionCollection: { type: object, required: [value], properties: { '@odata.context': { type: string, format: uri }, '@odata.nextLink': { type: string, format: uri }, value: { type: array, items: { $ref: '#/components/schemas/Permission' } } } }
+    Permission:
+      type: object
+      required: [id]
+      properties:
+        id: { type: string }
+        roles: { type: array, items: { type: string } }
+        shareId: { type: string }
+        expirationDateTime: { type: [string, 'null'], format: date-time }
+        hasPassword: { type: boolean }
+        link: { type: object, properties: { type: { type: string }, scope: { type: string }, webUrl: { type: string, format: uri } }, additionalProperties: true }
+        grantedToV2: { type: object, additionalProperties: true }
+        grantedToIdentitiesV2: { type: array, items: { type: object, additionalProperties: true } }
+        inheritedFrom: { type: object, additionalProperties: true }
+    GraphError: { type: object, required: [error], properties: { error: { type: object, required: [code, message], properties: { code: { type: string }, message: { type: string }, innerError: { type: object, additionalProperties: true } } } } }

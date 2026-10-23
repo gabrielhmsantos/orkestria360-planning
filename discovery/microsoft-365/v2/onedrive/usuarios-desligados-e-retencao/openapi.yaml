@@ -1,0 +1,30 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — Deleted users for OneDrive offboarding, version: v1.0 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /directory/deletedItems/microsoft.graph.user:
+    get:
+      summary: Lista usuários excluídos do diretório
+      security: [{ graphApp: [User.Read.All] }]
+      parameters: [{ name: $select, in: query, required: false, schema: { type: string } }]
+      responses:
+        '200': { description: Coleção OData de usuários excluídos, content: { application/json: { schema: { $ref: '#/components/schemas/DeletedUserCollection' } } } }
+        '401': { $ref: '#/components/responses/GraphError' }
+        '403': { $ref: '#/components/responses/GraphError' }
+        '429': { $ref: '#/components/responses/GraphError' }
+components:
+  securitySchemes: { graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token', scopes: { User.Read.All: Lê usuários excluídos, Directory.Read.All: Lê dados de diretório } } } } }
+  responses: { GraphError: { description: Erro Microsoft Graph, content: { application/json: { schema: { $ref: '#/components/schemas/GraphError' } } } } }
+  schemas:
+    DeletedUserCollection: { type: object, required: [value], properties: { '@odata.context': { type: string, format: uri }, '@odata.nextLink': { type: string, format: uri }, value: { type: array, items: { $ref: '#/components/schemas/DeletedUser' } } } }
+    DeletedUser:
+      type: object
+      required: [id]
+      properties:
+        id: { type: string }
+        displayName: { type: [string, 'null'] }
+        userPrincipalName: { type: [string, 'null'] }
+        department: { type: [string, 'null'] }
+        deletedDateTime: { type: [string, 'null'], format: date-time }
+        createdDateTime: { type: [string, 'null'], format: date-time }
+    GraphError: { type: object, required: [error], properties: { error: { type: object, required: [code, message], properties: { code: { type: string }, message: { type: string }, innerError: { type: object, additionalProperties: true } } } } }

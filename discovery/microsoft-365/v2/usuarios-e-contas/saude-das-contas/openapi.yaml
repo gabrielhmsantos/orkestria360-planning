@@ -1,0 +1,10 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — Saúde das Contas, version: v1 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /users: { get: { summary: Atributos para regras de qualidade, security: [{ graphApp: [] }], parameters: [{ name: '$select', in: query, schema: { type: string } }], responses: { '200': { $ref: '#/components/responses/collection' }, '403': { $ref: '#/components/responses/error' } } } }
+  /users/{user-id}/manager: { get: { summary: Evidência de gestor, security: [{ graphApp: [] }], parameters: [{ name: user-id, in: path, required: true, schema: { type: string } }], responses: { '200': { $ref: '#/components/responses/entity' }, '404': { description: Ausência de gestor } } } }
+  /identityProtection/riskyUsers: { get: { summary: Evidência de risco (P2), security: [{ graphApp: [] }], responses: { '200': { $ref: '#/components/responses/collection' }, '403': { $ref: '#/components/responses/error' } } } }
+components:
+  securitySchemes: { graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token', scopes: { 'https://graph.microsoft.com/.default': Consentimento Graph } } } } }
+  responses: { collection: { description: Coleção, content: { application/json: { schema: { type: object, properties: { value: { type: array, items: { type: object, additionalProperties: true } } } } } } }, entity: { description: Entidade, content: { application/json: { schema: { type: object, additionalProperties: true } } } }, error: { description: Erro Graph } }

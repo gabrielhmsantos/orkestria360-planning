@@ -1,0 +1,4 @@
+interface:
+  display_name: "Make Discovery"
+  short_description: "Descubra produto, UI e fontes da feature"
+  default_prompt: "Use $make-discovery no track product-ui, backend ou full para estruturar o discovery único da feature."
