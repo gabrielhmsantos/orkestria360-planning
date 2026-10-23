@@ -1,0 +1,5 @@
+# Pontuação por Categoria — Decisões
+
+- Os títulos “Pontuação por Categoria”, “Distribuição dos Controles por Status”, “Comparativo por Categoria”, “Evolução por Categoria (últimos 90 dias)” e “Top 5 Categorias com Maior Ganho Potencial” vêm da PNG 02.
+- Cálculo confirmado: pontos atuais/máximos da categoria são as somas dos controles daquela categoria; percentual = `pontos atuais / pontos máximos × 100`. Fonte: DOCX.
+- Clarificação — Q: Como agrupar controles em concluídos, parciais e pendentes? → A: B — progresso por score (origem: usuário; data: 2026-08-14). Para cada controle associado, com `secureScores.controlScores.score` e `secureScoreControlProfiles.maxScore` numéricos e máximo > 0: concluído quando `score >= maxScore`; parcial quando `0 < score < maxScore`; pendente quando `score = 0`. Campo ausente/nulo, máximo não positivo ou perfil não associado não entra em nenhum grupo e reduz a cobertura exibida. `implementationStatus` é preservado como status Microsoft de apresentação, sem alterar o grupo de progresso.

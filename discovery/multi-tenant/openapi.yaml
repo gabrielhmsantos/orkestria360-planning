@@ -1,0 +1,53 @@
+openapi: 3.1.0
+info:
+  title: Microsoft Graph organization validation
+  version: 1.0.0
+servers:
+  - url: https://graph.microsoft.com/v1.0
+paths:
+  /organization:
+    get:
+      summary: Confirma a organização Graph após admin consent
+      security:
+        - graphApp: []
+      parameters:
+        - name: $select
+          in: query
+          required: true
+          schema:
+            type: string
+            const: id
+      responses:
+        '200':
+          description: Organização validada
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [value]
+                properties:
+                  value:
+                    type: array
+                    minItems: 1
+                    items:
+                      type: object
+                      required: [id]
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+        '401':
+          description: Falha de autenticação Graph; a classificação de domínio depende também da etapa e do código retornado.
+        '403':
+          description: Autorização Graph insuficiente; pode indicar permissão, consentimento ou outra restrição e não determina estado isoladamente.
+        '429':
+          description: Throttling; respeitar o header Retry-After quando presente.
+components:
+  securitySchemes:
+    graphApp:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token
+          scopes:
+            https://graph.microsoft.com/.default: Application Permissions consentidas no tenant

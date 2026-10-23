@@ -1,0 +1,22 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — Diretório de Grupos, version: v1 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /groups:
+    get:
+      summary: Lista grupos; sem corpo
+      security: [{ graphApp: [] }]
+      parameters: [{ name: '$select', in: query, schema: { type: string } }, { name: '$filter', in: query, schema: { type: string } }, { name: '$top', in: query, schema: { type: integer, maximum: 999 } }, { name: ConsistencyLevel, in: header, schema: { type: string, enum: [eventual] } }]
+      responses: { '200': { $ref: '#/components/responses/groups' }, '403': { description: Fonte restrita }, '429': { description: Respeitar Retry-After } }
+  /groups/{group-id}:
+    get:
+      summary: Detalhe de grupo; sem corpo
+      security: [{ graphApp: [] }]
+      parameters: [{ name: group-id, in: path, required: true, schema: { type: string } }, { name: '$select', in: query, schema: { type: string } }]
+      responses: { '200': { description: Entidade Group, content: { application/json: { schema: { $ref: '#/components/schemas/Group' } } } }, '403': { description: Fonte restrita }, '404': { description: Grupo inexistente ou removido } }
+components:
+  securitySchemes: { graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token', scopes: { 'https://graph.microsoft.com/.default': Group.Read.All } } } } }
+  responses: { groups: { description: Coleção OData paginável, content: { application/json: { schema: { $ref: '#/components/schemas/GroupCollection' } } } } }
+  schemas:
+    GroupCollection: { type: object, required: [value], properties: { '@odata.context': { type: string }, value: { type: array, items: { $ref: '#/components/schemas/Group' } }, '@odata.nextLink': { type: [string, 'null'] } } }
+    Group: { type: object, required: [id], properties: { id: { type: string }, displayName: { type: [string, 'null'], x-pii: true }, description: { type: [string, 'null'], x-pii: true }, mail: { type: [string, 'null'], x-pii: true }, mailEnabled: { type: [boolean, 'null'] }, securityEnabled: { type: [boolean, 'null'] }, groupTypes: { type: array, items: { type: string } }, visibility: { type: [string, 'null'] }, createdDateTime: { type: [string, 'null'], format: date-time }, expirationDateTime: { type: [string, 'null'], format: date-time }, membershipRule: { type: [string, 'null'], x-pii: true }, membershipRuleProcessingState: { type: [string, 'null'] }, onPremisesSyncEnabled: { type: [boolean, 'null'] }, resourceProvisioningOptions: { type: array, items: { type: string } }, assignedLicenses: { type: array, items: { type: object } }, licenseProcessingState: { type: [string, object, 'null'] }, isAssignableToRole: { type: [boolean, 'null'] }, classification: { type: [string, 'null'], x-pii: true } } }

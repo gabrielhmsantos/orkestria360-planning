@@ -1,0 +1,271 @@
+openapi: 3.1.0
+info:
+  title: Microsoft Graph — OneDrive security sources
+  version: v1.0
+  description: Contratos externos reutilizados pela projeção local; a tela não os chama diretamente.
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /security/secureScores:
+    get:
+      security: [{ graphApp: [SecurityEvents.Read.All] }]
+      parameters: [{ name: '$top', in: query, schema: { type: integer, const: 25 } }]
+      responses:
+        '200': { description: Scores paginados; observados por GET temporário., x-observed: true, content: { application/json: { schema: { $ref: '#/components/schemas/SecureScoreCollection' } } } }
+        '401': { $ref: '#/components/responses/GraphError' }
+        '403': { $ref: '#/components/responses/GraphError' }
+        '429': { $ref: '#/components/responses/GraphError' }
+  /security/secureScoreControlProfiles:
+    get:
+      security: [{ graphApp: [SecurityEvents.Read.All] }]
+      parameters: [{ name: '$top', in: query, schema: { type: integer, const: 25 } }]
+      responses:
+        '200': { description: Perfis de controles paginados; observados por GET temporário., x-observed: true, content: { application/json: { schema: { $ref: '#/components/schemas/SecureScoreControlProfileCollection' } } } }
+        '401': { $ref: '#/components/responses/GraphError' }
+        '403': { $ref: '#/components/responses/GraphError' }
+        '429': { $ref: '#/components/responses/GraphError' }
+  /admin/sharepoint/settings:
+    get:
+      security: [{ graphApp: [SharePointTenantSettings.Read.All] }]
+      responses:
+        '200': { description: Configurações de tenant SharePoint/OneDrive; observadas por GET temporário., x-observed: true, content: { application/json: { schema: { $ref: '#/components/schemas/SharePointSettings' } } } }
+        '401': { $ref: '#/components/responses/GraphError' }
+        '403': { $ref: '#/components/responses/GraphError' }
+        '429': { $ref: '#/components/responses/GraphError' }
+  /identity/conditionalAccess/policies:
+    get:
+      summary: Políticas CA; reutiliza validação e fotografia canônicas de Configurações/Identidade e Acesso
+      security: [{ graphApp: [Policy.Read.All] }]
+      parameters: [{ name: '$top', in: query, schema: { type: integer, const: 100 } }]
+      responses:
+        '200': { description: Coleção OData; vazio válido observado no discovery canônico., x-observed: true, content: { application/json: { schema: { $ref: '#/components/schemas/ConditionalAccessPolicyCollection' } } } }
+        '401': { $ref: '#/components/responses/GraphError' }
+        '403': { $ref: '#/components/responses/GraphError' }
+        '429': { $ref: '#/components/responses/GraphError' }
+  /security/dataSecurityAndGovernance/sensitivityLabels:
+    get:
+      security: [{ graphApp: [SensitivityLabels.Read.All] }]
+      parameters:
+        - { name: '$top', in: query, schema: { type: integer, const: 25 } }
+        - { name: '$select', in: query, schema: { type: string, const: 'id,displayName,name,hasProtection,isDefault,priority' } }
+      responses:
+        '200': { description: Catálogo de rótulos de sensibilidade; coleção vazia observada por GET temporário., x-observed: true, content: { application/json: { schema: { $ref: '#/components/schemas/SensitivityLabelCollection' } } } }
+        '401': { $ref: '#/components/responses/GraphError' }
+        '403': { $ref: '#/components/responses/GraphError' }
+        '429': { $ref: '#/components/responses/GraphError' }
+  /security/labels/retentionLabels:
+    get:
+      x-consumed-directly: false
+      x-disposition: 'Não selecionado para app-only; catálogo fornecido pelo export Purview documentado em api.md.'
+      security: [{ graphDelegated: [RecordsManagement.Read.All] }]
+      parameters:
+        - { name: '$top', in: query, schema: { type: integer, const: 25 } }
+        - { name: '$select', in: query, schema: { type: string, const: 'id,displayName,isInUse,behaviorDuringRetentionPeriod,actionAfterRetentionPeriod,retentionTrigger,retentionDuration,lastModifiedDateTime' } }
+      responses:
+        '200': { description: 'Catálogo documentado, mas sem suporte a client credentials; sem observação técnica app-only.', x-observed: false, content: { application/json: { schema: { $ref: '#/components/schemas/RetentionLabelCollection' } } } }
+        '401': { $ref: '#/components/responses/GraphError' }
+        '403': { $ref: '#/components/responses/GraphError' }
+        '429': { $ref: '#/components/responses/GraphError' }
+  /security/alerts_v2:
+    get:
+      security: [{ graphApp: [SecurityAlert.Read.All] }]
+      parameters:
+        - { name: '$top', in: query, schema: { type: integer, const: 25 } }
+        - { name: '$filter', in: query, required: false, schema: { type: string, enum: ["serviceSource eq 'dataLossPrevention'"] } }
+      responses:
+        '200': { description: 'Alertas Defender paginados; a projeção filtra evidência OneDrive/SharePoint localmente e, para DLP, exige serviceSource dataLossPrevention. Resposta OData observada.', x-observed: true, content: { application/json: { schema: { $ref: '#/components/schemas/AlertCollection' } } } }
+        '401': { $ref: '#/components/responses/GraphError' }
+        '403': { $ref: '#/components/responses/GraphError' }
+        '429': { $ref: '#/components/responses/GraphError' }
+  /drives/{drive-id}/items/{item-id}/retentionLabel:
+    get:
+      security: [{ graphApp: [Files.Read.All] }]
+      parameters:
+        - { name: drive-id, in: path, required: true, schema: { type: string } }
+        - { name: item-id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Resposta observada com contexto OData; propriedades de rótulo são opcionais e não foram publicadas nessa resposta., x-observed: true, content: { application/json: { schema: { $ref: '#/components/schemas/ItemRetentionLabel' } } } }
+        '401': { $ref: '#/components/responses/GraphError' }
+        '403': { $ref: '#/components/responses/GraphError' }
+        '404': { $ref: '#/components/responses/GraphError' }
+        '429': { $ref: '#/components/responses/GraphError' }
+components:
+  securitySchemes:
+    graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token', scopes: { SecurityEvents.Read.All: Read security events, SecurityAlert.Read.All: Read security alerts, Policy.Read.All: Read policies, SharePointTenantSettings.Read.All: Read SharePoint tenant settings, SensitivityLabel.Read: Read sensitivity labels, SensitivityLabels.Read.All: Read all sensitivity labels, Files.Read.All: Read files } } } }
+    graphDelegated: { type: oauth2, flows: { authorizationCode: { authorizationUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize', tokenUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token', scopes: { RecordsManagement.Read.All: Read retention labels with a signed-in user } } } }
+  responses:
+    GraphError: { description: Erro Graph, content: { application/json: { schema: { $ref: '#/components/schemas/GraphError' } } } }
+  schemas:
+    ConditionalAccessPolicyCollection:
+      type: object
+      required: [value]
+      properties:
+        '@odata.context': { type: string, format: uri }
+        '@odata.nextLink': { type: string, format: uri }
+        value: { type: array, items: { $ref: '#/components/schemas/ConditionalAccessPolicy' } }
+    ConditionalAccessPolicy:
+      type: object
+      required: [id]
+      properties:
+        id: { type: string }
+        displayName: { type: [string, 'null'], x-sensitive: true }
+        state: { type: string, enum: [enabled, disabled, enabledForReportingButNotEnforced] }
+        createdDateTime: { type: [string, 'null'], format: date-time }
+        modifiedDateTime: { type: [string, 'null'], format: date-time }
+        conditions:
+          type: [object, 'null']
+          properties:
+            users:
+              type: [object, 'null']
+              properties:
+                includeUsers: { type: array, items: { type: string }, x-sensitive: true }
+                excludeUsers: { type: array, items: { type: string }, x-sensitive: true }
+                includeGroups: { type: array, items: { type: string }, x-sensitive: true }
+                excludeGroups: { type: array, items: { type: string }, x-sensitive: true }
+                includeRoles: { type: array, items: { type: string } }
+                excludeRoles: { type: array, items: { type: string } }
+              additionalProperties: true
+            applications:
+              type: [object, 'null']
+              properties:
+                includeApplications: { type: array, items: { type: string } }
+                excludeApplications: { type: array, items: { type: string } }
+                includeUserActions: { type: array, items: { type: string } }
+              additionalProperties: true
+            clientAppTypes: { type: array, items: { type: string } }
+          additionalProperties: true
+        grantControls:
+          type: [object, 'null']
+          properties:
+            operator: { type: string, enum: [AND, OR] }
+            builtInControls: { type: array, items: { type: string } }
+            customAuthenticationFactors: { type: array, items: { type: string } }
+            termsOfUse: { type: array, items: { type: string } }
+            authenticationStrength:
+              type: [object, 'null']
+              properties:
+                id: { type: string }
+                requirementsSatisfied: { type: string }
+                allowedCombinations: { type: array, items: { type: string } }
+              additionalProperties: true
+          additionalProperties: true
+        sessionControls: { type: [object, 'null'], additionalProperties: true }
+    ItemRetentionLabel:
+      type: object
+      properties:
+        name: { type: string }
+        isLabelAppliedExplicitly: { type: boolean }
+        labelAppliedDateTime: { type: string, format: date-time }
+        retentionSettings: { type: object, additionalProperties: true }
+        labelAppliedBy: { type: object, additionalProperties: true }
+    AlertCollection:
+      type: object
+      required: [value]
+      properties:
+        '@odata.context': { type: string, format: uri }
+        '@odata.nextLink': { type: string, format: uri }
+        value: { type: array, items: { $ref: '#/components/schemas/Alert' } }
+    Alert:
+      type: object
+      required: [id]
+      properties:
+        id: { type: string }
+        createdDateTime: { type: [string, 'null'], format: date-time }
+        lastUpdateDateTime: { type: [string, 'null'], format: date-time }
+        severity: { type: [string, 'null'] }
+        status: { type: [string, 'null'] }
+        serviceSource: { type: [string, 'null'] }
+        title: { type: [string, 'null'] }
+        evidence:
+          type: array
+          items:
+            type: object
+            properties:
+              '@odata.type': { type: string }
+              url: { type: string, format: uri }
+            additionalProperties: true
+    SensitivityLabelCollection:
+      type: object
+      required: [value]
+      properties:
+        '@odata.context': { type: string, format: uri }
+        '@odata.nextLink': { type: string, format: uri }
+        value: { type: array, items: { $ref: '#/components/schemas/SensitivityLabel' } }
+    SensitivityLabel:
+      type: object
+      required: [id]
+      properties:
+        id: { type: string }
+        displayName: { type: [string, 'null'] }
+        name: { type: [string, 'null'] }
+        hasProtection: { type: [boolean, 'null'] }
+        isDefault: { type: [boolean, 'null'] }
+        priority: { type: [integer, 'null'] }
+    RetentionLabelCollection:
+      type: object
+      required: [value]
+      properties:
+        '@odata.context': { type: string, format: uri }
+        '@odata.nextLink': { type: string, format: uri }
+        value: { type: array, items: { $ref: '#/components/schemas/RetentionLabel' } }
+    RetentionLabel:
+      type: object
+      required: [id]
+      properties:
+        id: { type: string }
+        displayName: { type: [string, 'null'] }
+        isInUse: { type: [boolean, 'null'] }
+        behaviorDuringRetentionPeriod: { type: [string, 'null'] }
+        actionAfterRetentionPeriod: { type: [string, 'null'] }
+        retentionTrigger: { type: [string, 'null'] }
+        retentionDuration: { type: [object, 'null'], additionalProperties: true }
+        lastModifiedDateTime: { type: [string, 'null'], format: date-time }
+    SecureScoreCollection:
+      type: object
+      required: [value]
+      properties:
+        '@odata.context': { type: string, format: uri }
+        '@odata.nextLink': { type: string, format: uri }
+        value: { type: array, items: { $ref: '#/components/schemas/SecureScore' } }
+    SecureScore:
+      type: object
+      properties:
+        id: { type: string }
+        createdDateTime: { type: string, format: date-time }
+        currentScore: { type: number }
+        maxScore: { type: number }
+        controlScores: { type: array, items: { type: object, additionalProperties: true } }
+    SecureScoreControlProfileCollection:
+      type: object
+      required: [value]
+      properties:
+        '@odata.context': { type: string, format: uri }
+        '@odata.nextLink': { type: string, format: uri }
+        value: { type: array, items: { $ref: '#/components/schemas/SecureScoreControlProfile' } }
+    SecureScoreControlProfile:
+      type: object
+      properties:
+        id: { type: string }
+        controlCategory: { type: [string, 'null'] }
+        maxScore: { type: number }
+        remediation: { type: [string, 'null'] }
+        service: { type: [string, 'null'] }
+        threats: { type: array, items: { type: string } }
+        controlStateUpdates: { type: array, items: { type: object, additionalProperties: true } }
+    SharePointSettings:
+      type: object
+      properties:
+        sharingCapability: { type: [string, 'null'] }
+        sharingDomainRestrictionMode: { type: [string, 'null'] }
+        sharingAllowedDomainList: { type: array, items: { type: string }, x-sensitive: true }
+        sharingBlockedDomainList: { type: array, items: { type: string }, x-sensitive: true }
+        isLegacyAuthProtocolsEnabled: { type: [boolean, 'null'] }
+        isRequireAcceptingUserToMatchInvitedUserEnabled: { type: [boolean, 'null'] }
+        isResharingByExternalUsersEnabled: { type: [boolean, 'null'] }
+        isUnmanagedSyncAppForTenantRestricted: { type: [boolean, 'null'] }
+        isSyncButtonHiddenOnPersonalSite: { type: [boolean, 'null'] }
+        deletedUserPersonalSiteRetentionPeriodInDays: { type: [integer, 'null'] }
+        personalSiteDefaultStorageLimitInMB: { type: [integer, 'null'] }
+    GraphError:
+      type: object
+      required: [error]
+      properties: { error: { type: object, required: [code, message], properties: { code: { type: string }, message: { type: string }, innerError: { type: object, additionalProperties: true } } } }

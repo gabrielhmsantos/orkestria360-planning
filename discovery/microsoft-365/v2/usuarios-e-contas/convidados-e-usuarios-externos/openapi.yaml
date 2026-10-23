@@ -1,0 +1,39 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — Convidados e Usuários Externos, version: v1 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /users:
+    get:
+      summary: Lista de convidados B2B
+      security: [{ graphApp: [] }]
+      parameters:
+        - { name: '$filter', in: query, required: true, schema: { type: string, const: "userType eq 'Guest'" } }
+        - { name: '$select', in: query, schema: { type: string, example: 'id,displayName,userPrincipalName,mail,accountEnabled,userType,createdDateTime,creationType,companyName,externalUserState,externalUserStateChangeDateTime,assignedLicenses' } }
+        - { name: '$top', in: query, schema: { type: integer, maximum: 500 } }
+      responses: { '200': { description: Coleção base JSON de convidados; atividade é enriquecimento separado, content: { application/json: { schema: { $ref: '#/components/schemas/UserCollection' } } } }, '403': { description: Sem User.Read.All } }
+components:
+  securitySchemes: { graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token', scopes: { 'https://graph.microsoft.com/.default': User.Read.All e consentimentos associados } } } } }
+  schemas:
+    UserCollection:
+      type: object
+      required: [value]
+      properties:
+        '@odata.context': { type: string }
+        '@odata.nextLink': { type: string }
+        value: { type: array, items: { $ref: '#/components/schemas/GuestUser' } }
+    GuestUser:
+      type: object
+      required: [id, userPrincipalName, accountEnabled, userType]
+      properties:
+        id: { type: string }
+        displayName: { type: [string, 'null'] }
+        userPrincipalName: { type: string }
+        accountEnabled: { type: boolean }
+        userType: { type: string, const: Guest }
+        createdDateTime: { type: [string, 'null'], format: date-time }
+        creationType: { type: [string, 'null'] }
+        companyName: { type: [string, 'null'] }
+        mail: { type: [string, 'null'], format: email }
+        externalUserState: { type: [string, 'null'] }
+        externalUserStateChangeDateTime: { type: [string, 'null'], format: date-time }
+        assignedLicenses: { type: array, items: { type: object, properties: { skuId: { type: string }, disabledPlans: { type: array, items: { type: string } } } } }

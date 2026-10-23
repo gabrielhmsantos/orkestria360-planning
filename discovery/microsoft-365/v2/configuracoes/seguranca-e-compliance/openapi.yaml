@@ -1,0 +1,202 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph - TCM para Seguranca e Compliance, version: v1.0 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /servicePrincipals(appId='03b07b79-c5bc-4b5e-9bfa-13acf4a99998'):
+    get:
+      summary: Verifica se o service principal Microsoft TCM existe no tenant
+      x-homologation: viable
+      x-observed-result: '200 em uma conexao; 404 Request_ResourceNotFound em outra'
+      security: [{ graphApp: [Application.Read.All] }]
+      parameters: [{ $ref: '#/components/parameters/SelectTcmPrincipal' }]
+      responses: { '200': { description: Service principal TCM instalado, content: { application/json: { schema: { $ref: '#/components/schemas/TcmServicePrincipal' } } } }, '404': { $ref: '#/components/responses/GraphError' }, '403': { $ref: '#/components/responses/GraphError' } }
+  /servicePrincipals(appId='03b07b79-c5bc-4b5e-9bfa-13acf4a99998')/memberOf/microsoft.graph.directoryRole:
+    get:
+      summary: Verifica roles Entra diretas do service principal Microsoft TCM
+      description: O filtro por roleTemplateId testa uma role; a consulta ampla deve ser usada para distinguir filtro sem correspondencia de resposta OData vazia.
+      x-homologation: viable
+      x-observed-result: 'Global Reader: um item; Security Reader: filtro vazio e consulta ampla com um item, na conexao com TCM instalado'
+      security: [{ graphApp: [Application.Read.All] }]
+      parameters: [{ $ref: '#/components/parameters/ConsistencyLevel' }, { $ref: '#/components/parameters/Count' }, { $ref: '#/components/parameters/RoleTemplateFilter' }, { $ref: '#/components/parameters/SelectDirectoryRole' }]
+      responses: { '200': { description: Colecao OData de roles diretas do TCM, content: { application/json: { schema: { $ref: '#/components/schemas/DirectoryRoleCollection' } } } }, '404': { $ref: '#/components/responses/GraphError' }, '403': { $ref: '#/components/responses/GraphError' } }
+  /servicePrincipals(appId='6b91db1b-f05b-405a-a0b2-e3f60b28d645'):
+    get:
+      summary: Verifica se o service principal Microsoft M365 Admin Services existe no tenant
+      x-homologation: viable
+      x-observed-result: '200 nas duas conexoes'
+      security: [{ graphApp: [Application.Read.All] }]
+      parameters: [{ $ref: '#/components/parameters/SelectTcmPrincipal' }]
+      responses: { '200': { description: Service principal M365 Admin Services provisionado, content: { application/json: { schema: { $ref: '#/components/schemas/M365AdminServicesPrincipal' } } } }, '404': { $ref: '#/components/responses/GraphError' }, '403': { $ref: '#/components/responses/GraphError' } }
+  /servicePrincipals(appId='00000002-0000-0ff1-ce00-000000000000'):
+    get:
+      summary: Resolve o principal Office 365 Exchange Online e a app role Exchange.ManageAsApp
+      x-homologation: viable
+      x-observed-result: '200 com id e appRoles nas duas conexoes'
+      security: [{ graphApp: [Application.Read.All] }]
+      parameters: [{ $ref: '#/components/parameters/SelectExchangeServicePrincipal' }]
+      responses: { '200': { description: Principal Exchange com appRoles para resolver a role por value, content: { application/json: { schema: { $ref: '#/components/schemas/ExchangeServicePrincipal' } } } }, '404': { $ref: '#/components/responses/GraphError' }, '403': { $ref: '#/components/responses/GraphError' } }
+  /servicePrincipals(appId='03b07b79-c5bc-4b5e-9bfa-13acf4a99998')/appRoleAssignments:
+    get:
+      summary: Lista application permissions atribuídas diretamente ao service principal TCM
+      description: Usado para verificar Exchange.ManageAsApp no principal TCM pela combinação de resourceId e appRoleId resolvidos do principal Exchange; nunca no principal Orkestria 360.
+      x-homologation: viable
+      x-observed-result: '200 OData com value vazio na conexao com TCM; 404 onde TCM nao existe'
+      security: [{ graphApp: [Application.Read.All] }]
+      parameters: [{ $ref: '#/components/parameters/SelectAppRoleAssignment' }]
+      responses: { '200': { description: Colecao OData de application permissions do TCM, content: { application/json: { schema: { $ref: '#/components/schemas/AppRoleAssignmentCollection' } } } }, '404': { $ref: '#/components/responses/GraphError' }, '403': { $ref: '#/components/responses/GraphError' } }
+  /admin/configurationManagement/configurationSnapshots:
+    get:
+      summary: Lista snapshots TCM (fonte candidata beta)
+      servers: [{ url: https://graph.microsoft.com/beta }]
+      x-homologation: insufficient
+      x-observed-result: '403 por licenca em uma conexao; 404 UnknownError em outra'
+      security: [{ graphApp: [ConfigurationMonitoring.Read.All] }]
+      parameters: [{ $ref: '#/components/parameters/Top' }]
+      responses: { '200': { description: Colecao OData de snapshots TCM; ainda nao observada, content: { application/json: { schema: { $ref: '#/components/schemas/ConfigurationSnapshotCollection' } } } }, '403': { $ref: '#/components/responses/GraphError' }, '404': { $ref: '#/components/responses/GraphError' } }
+  /admin/configurationManagement/configurationMonitors:
+    get:
+      summary: Lista monitores TCM
+      security: [{ graphApp: [ConfigurationMonitoring.Read.All] }]
+      parameters: [{ $ref: '#/components/parameters/Top' }]
+      responses: { '200': { description: Colecao OData de monitores TCM; observada vazia em uma conexao, content: { application/json: { schema: { $ref: '#/components/schemas/ConfigurationMonitorCollection' } } } }, '403': { $ref: '#/components/responses/GraphError' } }
+  /admin/configurationManagement/configurationSnapshotJobs:
+    get:
+      summary: Lista jobs de snapshot TCM que podem conter recursos Exchange
+      servers: [{ url: https://graph.microsoft.com/beta }]
+      x-homologation: partial
+      x-observed-result: '403 por licenca E3/P1 na conexao com TCM e Global Reader; 200 OData vazio na outra, com e sem $select'
+      security: [{ graphApp: [ConfigurationMonitoring.Read.All] }]
+      parameters: [{ $ref: '#/components/parameters/SelectSnapshotJob' }]
+      responses: { '200': { description: Colecao OData de jobs de snapshot; envelope observado vazio, content: { application/json: { schema: { $ref: '#/components/schemas/ConfigurationSnapshotJobCollection' } } } }, '403': { $ref: '#/components/responses/GraphError' }, '429': { $ref: '#/components/responses/GraphError' } }
+components:
+  parameters:
+    Top: { name: $top, in: query, schema: { type: integer, minimum: 1 } }
+    SelectTcmPrincipal: { name: $select, in: query, schema: { type: string, example: 'appId,displayName,accountEnabled' } }
+    ConsistencyLevel: { name: ConsistencyLevel, in: header, required: true, schema: { type: string, enum: [eventual] } }
+    Count: { name: $count, in: query, required: true, schema: { type: boolean, const: true } }
+    RoleTemplateFilter: { name: $filter, in: query, schema: { type: string, example: "roleTemplateId eq 'f2ef992c-3afb-46b9-b7cf-a126ee74c451'" } }
+    SelectDirectoryRole: { name: $select, in: query, schema: { type: string, example: 'roleTemplateId,displayName' } }
+    SelectSnapshotJob: { name: $select, in: query, schema: { type: string, example: 'status,resources,resourceLocation,completedDateTime' } }
+    SelectExchangeServicePrincipal: { name: $select, in: query, schema: { type: string, example: 'id,appId,displayName,appRoles' } }
+    SelectAppRoleAssignment: { name: $select, in: query, schema: { type: string, example: 'appRoleId,resourceId,resourceDisplayName,principalType' } }
+  securitySchemes:
+    graphApp:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token
+          scopes: { 'https://graph.microsoft.com/.default': Consentimentos Graph }
+  responses:
+    GraphError: { description: Erro Microsoft Graph, content: { application/json: { schema: { $ref: '#/components/schemas/GraphError' } } } }
+  schemas:
+    GraphError: { type: object, required: [error], properties: { error: { type: object, required: [code, message], properties: { code: { type: string }, message: { type: string }, innerError: { type: object, additionalProperties: true } } } } }
+    TcmServicePrincipal:
+      type: object
+      x-observed: true
+      required: [appId, displayName, accountEnabled]
+      properties: { appId: { type: string, format: uuid }, displayName: { type: string }, accountEnabled: { type: boolean } }
+    M365AdminServicesPrincipal:
+      type: object
+      x-observed: true
+      required: [appId, displayName, accountEnabled]
+      properties: { appId: { type: string, format: uuid }, displayName: { type: string }, accountEnabled: { type: boolean } }
+    ExchangeServicePrincipal:
+      type: object
+      x-observed: true
+      required: [id, appId, displayName, appRoles]
+      properties: { id: { type: string, format: uuid }, appId: { type: string, format: uuid }, displayName: { type: string }, appRoles: { type: array, items: { $ref: '#/components/schemas/ExchangeAppRole' } } }
+    ExchangeAppRole:
+      type: object
+      x-observed: false
+      x-resolution-rule: value == Exchange.ManageAsApp
+      required: [id, value]
+      properties: { id: { type: string, format: uuid }, value: { type: string }, displayName: { type: [string, 'null'] }, description: { type: [string, 'null'] }, isEnabled: { type: boolean }, allowedMemberTypes: { type: array, items: { type: string } } }
+    DirectoryRoleCollection:
+      type: object
+      x-observed: true
+      required: [value]
+      properties: { '@odata.context': { type: string }, '@odata.count': { type: integer, minimum: 0 }, '@odata.nextLink': { type: string, format: uri }, value: { type: array, items: { $ref: '#/components/schemas/DirectoryRoleMembership' } } }
+    DirectoryRoleMembership:
+      type: object
+      x-observed: true
+      required: [roleTemplateId, displayName]
+      properties: { roleTemplateId: { type: string, format: uuid }, displayName: { type: string } }
+    AppRoleAssignmentCollection:
+      type: object
+      x-observed: true
+      required: [value]
+      properties: { '@odata.context': { type: string }, '@odata.count': { type: integer, minimum: 0 }, '@odata.nextLink': { type: string, format: uri }, value: { type: array, items: { $ref: '#/components/schemas/AppRoleAssignment' } } }
+    AppRoleAssignment:
+      type: object
+      x-observed: false
+      x-documentation-source: Microsoft Learn servicePrincipal appRoleAssignments
+      required: [appRoleId, resourceId, principalType]
+      properties: { id: { type: string }, createdDateTime: { type: [string, 'null'], format: date-time }, appRoleId: { type: string, format: uuid }, principalDisplayName: { type: [string, 'null'] }, principalId: { type: string, format: uuid }, principalType: { type: string }, resourceDisplayName: { type: [string, 'null'] }, resourceId: { type: string, format: uuid } }
+    ConfigurationSnapshotJobCollection:
+      type: object
+      x-observed: true
+      required: [value]
+      properties: { '@odata.context': { type: string }, '@odata.nextLink': { type: string, format: uri }, value: { type: array, items: { $ref: '#/components/schemas/ConfigurationSnapshotJob' } } }
+    ConfigurationSnapshotJob:
+      type: object
+      x-observed: false
+      x-documentation-source: Microsoft Learn configurationSnapshotJob beta
+      required: [id, status]
+      properties: { id: { type: string, format: uuid }, displayName: { type: [string, 'null'] }, description: { type: [string, 'null'] }, status: { type: string, enum: [notStarted, running, succeeded, failed, partiallySuccessful, unknownFutureValue] }, resources: { type: array, items: { type: string } }, resourceLocation: { type: [string, 'null'], format: uri }, createdDateTime: { type: [string, 'null'], format: date-time }, completedDateTime: { type: [string, 'null'], format: date-time }, errorDetails: { type: array, items: { type: string } } }
+    ConfigurationSnapshotCollection:
+      type: object
+      x-observed: false
+      required: [value]
+      properties: { '@odata.context': { type: string }, '@odata.nextLink': { type: string, format: uri }, value: { type: array, items: { $ref: '#/components/schemas/ConfigurationSnapshot' } } }
+    ConfigurationSnapshot:
+      type: object
+      x-observed: false
+      x-documentation-source: Microsoft Learn TCM Exchange resources
+      properties: { id: { type: string }, displayName: { type: string }, description: { type: [string, 'null'] }, parameters: { type: array, items: { type: object, additionalProperties: true } }, resources: { type: array, items: { $ref: '#/components/schemas/TcmSnapshotResource' } } }
+    TcmSnapshotResource:
+      type: object
+      description: Envelope documentado de recurso dentro de snapshot; nenhum recurso Exchange foi observado nos tenants validados.
+      x-observed: false
+      properties: { displayName: { type: string }, resourceType: { type: string }, properties: { type: object, additionalProperties: true } }
+    AntiPhishPolicyProperties:
+      type: object
+      description: Schema documentado do recurso TCM antiPhishPolicy.
+      x-observed: false
+      x-tcm-service-principal-role-for-read: Security Reader
+      x-exchange-application-permission-for-read: Exchange.ManageAsApp
+      required: [Identity]
+      properties: { Identity: { type: string }, Ensure: { type: string, enum: [Present, Absent] }, Enabled: { type: boolean }, PhishThresholdLevel: { type: string, enum: ['1', '2', '3', '4'] } }
+    AntiPhishRuleProperties:
+      type: object
+      description: Schema documentado do recurso TCM antiPhishRule; AntiPhishPolicy correlaciona regra e política.
+      x-observed: false
+      x-tcm-service-principal-role-for-read: Security Reader
+      x-exchange-application-permission-for-read: Exchange.ManageAsApp
+      required: [Identity, AntiPhishPolicy]
+      properties: { Identity: { type: string }, AntiPhishPolicy: { type: string }, Ensure: { type: string, enum: [Present, Absent] }, Enabled: { type: boolean }, Priority: { type: integer, minimum: 0 }, Comments: { type: string } }
+    InboundConnectorProperties:
+      type: object
+      description: Schema documentado do recurso TCM inboundConnector.
+      x-observed: false
+      x-tcm-service-principal-role-for-read: Global Reader
+      x-exchange-application-permission-for-read: Exchange.ManageAsApp
+      required: [Identity]
+      properties: { Identity: { type: string }, Ensure: { type: string, enum: [Present, Absent] }, Enabled: { type: boolean }, RequireTls: { type: boolean }, RestrictDomainsToCertificate: { type: boolean }, TlsSenderCertificateName: { type: string } }
+    OutboundConnectorProperties:
+      type: object
+      description: Schema documentado do recurso TCM outboundConnector.
+      x-observed: false
+      x-tcm-service-principal-role-for-read: Global Reader
+      x-exchange-application-permission-for-read: Exchange.ManageAsApp
+      required: [Identity]
+      properties: { Identity: { type: string }, Ensure: { type: string, enum: [Present, Absent] }, Enabled: { type: boolean }, TlsSettings: { type: string, enum: [EncryptionOnly, CertificateValidation, DomainValidation] }, TlsDomain: { type: string } }
+    ConfigurationMonitorCollection:
+      type: object
+      x-observed: true
+      required: [value]
+      properties: { '@odata.context': { type: string }, '@odata.nextLink': { type: string, format: uri }, value: { type: array, items: { $ref: '#/components/schemas/ConfigurationMonitor' } } }
+    ConfigurationMonitor:
+      type: object
+      description: Nenhum item foi retornado na validacao; propriedades individuais aguardam observacao.
+      x-observed: false
+      additionalProperties: true

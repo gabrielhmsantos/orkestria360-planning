@@ -1,0 +1,8 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — Dashboard MFA, version: v1 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /reports/authenticationMethods/userRegistrationDetails: { get: { summary: Registro MFA; fonte canônica já validada, security: [{ graphApp: [AuditLog.Read.All] }], responses: { '200': { description: Coleção OData }, '403': { description: Fonte restrita } } } }
+  /auditLogs/signIns: { get: { summary: Sign-ins; fonte canônica já validada, security: [{ graphApp: [AuditLog.Read.All] }], responses: { '200': { description: Coleção OData }, '403': { description: Fonte restrita }, '429': { description: Throttling } } } }
+  /identityProtection/riskyUsers: { get: { summary: Risco; 403 observado no tenant, security: [{ graphApp: [IdentityRiskyUser.Read.All] }], responses: { '200': { description: Coleção OData }, '403': { description: Fonte restrita } } } }
+components: { securitySchemes: { graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token', scopes: { 'https://graph.microsoft.com/.default': Consentimentos Graph } } } } } }

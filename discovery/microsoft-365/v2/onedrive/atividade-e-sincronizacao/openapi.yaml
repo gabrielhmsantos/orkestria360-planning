@@ -1,0 +1,75 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — OneDrive activity, version: v1.0 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /reports/getOneDriveActivityUserDetail(period='{period}'):
+    $ref: '#/components/pathItems/CsvReport'
+    summary: Relatório de atividade por usuário nos períodos D7/D30/D90/D180
+    description: Contrato oficial dos quatro agregados; observação externa existente apenas D30. Cada período recebe sua própria data de referência e conteúdo CSV.
+    x-observed-periods: [D30]
+    x-documented-periods: [D7, D30, D90, D180]
+  /reports/getOneDriveActivityUserCounts(period='{period}'):
+    $ref: '#/components/pathItems/CsvReport'
+  /reports/getOneDriveActivityFileCounts(period='{period}'):
+    $ref: '#/components/pathItems/CsvReport'
+  /deviceManagement/managedDevices:
+    get:
+      security: [{ graphApp: [DeviceManagementManagedDevices.Read.All] }]
+      parameters:
+        - { name: '$top', in: query, schema: { type: integer, const: 25 } }
+        - { name: '$select', in: query, schema: { type: string, const: 'id,userId,deviceName,azureADDeviceId,operatingSystem,lastSyncDateTime,complianceState,managementState,partnerReportedThreatState' } }
+      responses:
+        '200': { description: Dispositivos Intune paginados; observados por GET temporário., x-observed: true, content: { application/json: { schema: { $ref: '#/components/schemas/ManagedDeviceCollection' } } } }
+        '401': { $ref: '#/components/responses/GraphError' }
+        '403': { $ref: '#/components/responses/GraphError' }
+        '429': { $ref: '#/components/responses/GraphError' }
+components:
+  pathItems:
+    CsvReport:
+      get:
+        security: [{ graphApp: [Reports.Read.All] }]
+        parameters:
+          - { $ref: '#/components/parameters/AcceptCsv' }
+          - { $ref: '#/components/parameters/ReportPeriod' }
+        responses:
+          '302': { $ref: '#/components/responses/CsvRedirect' }
+          '401': { $ref: '#/components/responses/GraphError' }
+          '403': { $ref: '#/components/responses/GraphError' }
+          '429': { $ref: '#/components/responses/GraphError' }
+  parameters:
+    AcceptCsv: { name: Accept, in: header, required: true, schema: { type: string, const: text/csv } }
+    ReportPeriod: { name: period, in: path, required: true, description: Dias de agregação do relatório no parâmetro da função; não é query HTTP nem número de linhas CSV., schema: { type: string, enum: [D7, D30, D90, D180] } }
+  securitySchemes:
+    graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token', scopes: { Reports.Read.All: Read reports, DeviceManagementManagedDevices.Read.All: Read managed devices } } } }
+  responses:
+    CsvRedirect:
+      description: Redirect para CSV pré-autenticado. O download não recebe Authorization. Enumeração de períodos documentados não amplia a observação real existente de cada endpoint.
+      headers: { Location: { required: true, schema: { type: string, format: uri } } }
+      x-observed: true
+      x-post-redirect-download: { method: GET, authorization: forbidden, response: { '200': { content: { application/octet-stream: { schema: { type: string, format: binary } } } } } }
+    GraphError: { description: Erro Graph, content: { application/json: { schema: { $ref: '#/components/schemas/GraphError' } } } }
+  schemas:
+    ManagedDeviceCollection:
+      type: object
+      required: [value]
+      properties:
+        '@odata.context': { type: string, format: uri }
+        '@odata.nextLink': { type: string, format: uri }
+        value: { type: array, items: { $ref: '#/components/schemas/ManagedDevice' } }
+    ManagedDevice:
+      type: object
+      required: [id]
+      properties:
+        id: { type: string }
+        userId: { type: [string, 'null'] }
+        deviceName: { type: [string, 'null'] }
+        azureADDeviceId: { type: [string, 'null'] }
+        operatingSystem: { type: [string, 'null'] }
+        lastSyncDateTime: { type: [string, 'null'], format: date-time }
+        complianceState: { type: [string, 'null'] }
+        managementState: { type: [string, 'null'] }
+        partnerReportedThreatState: { type: [string, 'null'] }
+    GraphError:
+      type: object
+      required: [error]
+      properties: { error: { type: object, required: [code, message], properties: { code: { type: string }, message: { type: string }, innerError: { type: object, additionalProperties: true } } } }

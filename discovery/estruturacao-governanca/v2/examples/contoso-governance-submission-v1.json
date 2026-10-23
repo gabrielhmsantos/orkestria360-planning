@@ -1,0 +1,125 @@
+{
+  "fixtureVersion": "governance-evidence-form-v1",
+  "description": "Resposta fictícia completa de um único tenant, com todos os campos enviados e todas as seções revisadas pelo administrador.",
+  "tenant": { "id": "contoso-ltda", "name": "Contoso Ltda." },
+  "submittedAt": "2026-07-24T13:00:00Z",
+  "submittedBy": "patricia.lima@contoso.example",
+  "topics": [
+    {
+      "key": "inventario-de-ativos-de-ti",
+      "metadata": { "owner_name": "Patrícia Lima", "validity_months": 12, "last_reviewed_at": "2026-07-15", "notes": "Ciclo semestral de inventário." },
+      "responses": {
+        "scope": { "mode": "text", "objective": "Controlar os ativos de TI.", "covered_units": ["Matriz", "Filial SP"], "covered_environments": ["on-premises", "Azure", "Microsoft 365"] },
+        "categories": { "mode": "template_file", "file": "inventario-ativos-2026-07.xlsx", "asset_category": ["endpoint", "servidor", "rede"], "asset_type": ["notebook", "VM", "firewall"], "environment": ["Azure", "Matriz"] },
+        "inventory": { "mode": "template_file", "file": "inventario-ativos-2026-07.xlsx", "asset_id": "AST-0001..AST-1240", "asset_name": "preenchido na planilha", "owner": "preenchido na planilha", "status": "ativo/inativo/manutenção", "location": "preenchido na planilha" },
+        "identification": { "mode": "text", "identification_criteria": "Tag patrimonial e serial.", "owner_assignment": "Todo ativo possui responsável.", "lifecycle_status": "Ativo, manutenção, descartado." },
+        "maintenance": { "mode": "text", "technical_owner": "Infraestrutura", "update_frequency": "mensal", "last_update_at": "2026-07-15" },
+        "coverage": { "mode": "text", "coverage_percent": 92, "reconciliation_reference": "CMDB-2026-07", "divergence_count": 14 },
+        "gaps": { "mode": "text", "known_gaps": "Filial remota pendente.", "risks": "Ativos sem tag.", "remediation_plan": "Conciliação até agosto." }
+      },
+      "review": { "topic_status": "completed", "topic_score": 80, "reviewed_by": "william.bandeira@contoso.example", "reviewed_at": "2026-07-24T15:00:00Z", "sections": { "scope": { "status": "conformant", "score": 100 }, "categories": { "status": "conformant", "score": 100 }, "inventory": { "status": "conformant", "score": 100 }, "identification": { "status": "partial", "score": 60, "notes": "Ciclo de descarte não está uniforme." }, "maintenance": { "status": "conformant", "score": 100 }, "coverage": { "status": "partial", "score": 60, "notes": "Filial remota pendente." }, "gaps": { "status": "absent", "score": 0, "notes": "Plano ainda não aprovado." } } }
+    },
+    {
+      "key": "inventario-de-licencas-e-softwares",
+      "metadata": { "owner_name": "Bruno Costa", "validity_months": 12, "last_reviewed_at": "2026-07-10", "notes": "Conciliação mensal com Graph." },
+      "responses": {
+        "scope": { "mode": "text", "objective": "Controlar licenças e softwares.", "covered_products": ["Microsoft 365", "Defender", "Power BI"], "covered_units": ["Corporativo"] },
+        "categories": { "mode": "template_file", "file": "licencas-2026-07.xlsx", "software_category": ["produtividade", "segurança"], "vendor": ["Microsoft"], "product_name": ["M365 E3", "Defender for Endpoint"] },
+        "quantities": { "mode": "template_file", "file": "licencas-2026-07.xlsx", "sku": "SPE_E3", "contracted_quantity": 450, "assigned_quantity": 420, "available_quantity": 30 },
+        "ownership": { "mode": "text", "commercial_owner": "Financeiro", "technical_owner": "TI", "approval_owner": "Diretoria" },
+        "renewals": { "mode": "text", "renewal_date": "2027-01-31", "renewal_alerts": true, "renewal_owner": "Financeiro", "renewal_status": "monitorado" },
+        "reconciliation": { "mode": "text", "update_frequency": "mensal", "last_reconciliation_at": "2026-07-10", "graph_reconciliation_status": "conciliado" },
+        "risks": { "mode": "text", "unused_licenses": 30, "expired_licenses": 0, "sizing_risks": "Possível excesso de 10 E3.", "action_plan": "Revisar uso trimestralmente." }
+      },
+      "review": { "topic_status": "completed", "topic_score": 76, "reviewed_by": "william.bandeira@contoso.example", "reviewed_at": "2026-07-24T15:00:00Z", "sections": { "scope": { "status": "conformant", "score": 100 }, "categories": { "status": "conformant", "score": 100 }, "quantities": { "status": "conformant", "score": 100 }, "ownership": { "status": "conformant", "score": 100 }, "renewals": { "status": "partial", "score": 60, "notes": "Nem todos os contratos têm vigência confirmada." }, "reconciliation": { "status": "partial", "score": 60, "notes": "Conciliação manual pendente." }, "risks": { "status": "absent", "score": 0, "notes": "Plano para o excesso não foi aprovado." } } }
+    },
+    {
+      "key": "matriz-de-acessos-e-permissoes",
+      "metadata": { "owner_name": "William Bandeira", "validity_months": 6, "last_reviewed_at": "2026-07-18", "notes": "Matriz revisada por sistema crítico." },
+      "responses": {
+        "scope": { "mode": "template_file", "file": "matriz-acessos.xlsx", "system": ["Microsoft 365", "ERP"], "environment": ["produção"], "coverage_percent": 88 },
+        "profiles": { "mode": "template_file", "file": "matriz-acessos.xlsx", "role": ["Administrador", "Analista"], "permission": ["Leitura", "Aprovação"], "system": ["Microsoft 365"], "role_owner": ["TI"] },
+        "lifecycle": { "mode": "text", "grant_process": "Solicitação com aprovação.", "change_process": "Aprovado pelo gestor.", "revoke_process": "Revogação no desligamento.", "required_evidence": "Chamado e aprovação." },
+        "approvers": { "mode": "template_file", "file": "matriz-acessos.xlsx", "requester": "Gestor", "approver": "Dono do sistema", "executor": "TI", "reviewer": "Segurança" },
+        "review_cycle": { "mode": "text", "review_frequency": "trimestral", "last_review_at": "2026-07-18", "next_review_at": "2026-10-18" },
+        "privileged_access": { "mode": "text", "privileged_roles": ["Global Administrator"], "privileged_review": "trimestral", "emergency_accounts": 2 },
+        "critical_controls": { "mode": "text", "mfa_required": true, "conditional_access_reference": "CA-ADM-01", "exceptions": "Conta de serviço legada." }
+      },
+      "review": { "topic_status": "completed", "topic_score": 70, "reviewed_by": "william.bandeira@contoso.example", "reviewed_at": "2026-07-24T15:00:00Z", "sections": { "scope": { "status": "conformant", "score": 100 }, "profiles": { "status": "conformant", "score": 100 }, "lifecycle": { "status": "partial", "score": 60 }, "approvers": { "status": "conformant", "score": 100 }, "review_cycle": { "status": "partial", "score": 60 }, "privileged_access": { "status": "partial", "score": 60 }, "critical_controls": { "status": "absent", "score": 0, "notes": "Exceção legada sem prazo de remoção." } } }
+    },
+    {
+      "key": "mapa-de-rede-e-infraestrutura",
+      "metadata": { "owner_name": "Ana Martins", "validity_months": 12, "last_reviewed_at": "2026-06-30", "notes": "Diagrama corporativo atualizado." },
+      "responses": {
+        "scope": { "mode": "text", "sites": ["Matriz", "Filial SP"], "cloud_environments": ["Azure"], "networks": ["LAN", "VPN"], "coverage_percent": 90 },
+        "components": { "mode": "text_or_file", "file": "topologia-prod.pdf", "servers": 24, "firewalls": 2, "switches": 8, "connectivity": "VPN site-to-site", "microsoft_365": "Tenant corporativo", "azure": "Subscription Production" },
+        "interconnections": { "mode": "text_or_file", "file": "topologia-prod.pdf", "network_diagram": "Anexo", "integrations": ["ERP", "Azure AD"], "data_flows": "ERP para BI", "dependencies": "Internet e Azure AD" },
+        "redundancy": { "mode": "text", "redundancy_design": "Links redundantes na matriz.", "failover_process": "Procedimento documentado.", "single_points_of_failure": 1 },
+        "coverage": { "mode": "text", "covered_locations": ["Matriz", "Filial SP"], "uncovered_locations": ["Home office"], "coverage_percent": 90 },
+        "maintenance": { "mode": "text", "technical_owner": "Infraestrutura", "review_frequency": "anual", "last_review_at": "2026-06-30" },
+        "gaps": { "mode": "text", "gaps": "Home office sem diagrama.", "risks": "Dependência de link único na filial.", "remediation_plan": "Mapear filial no próximo ciclo." }
+      },
+      "review": { "topic_status": "completed", "topic_score": 70, "reviewed_by": "william.bandeira@contoso.example", "reviewed_at": "2026-07-24T15:00:00Z", "sections": { "scope": { "status": "conformant", "score": 100 }, "components": { "status": "conformant", "score": 100 }, "interconnections": { "status": "partial", "score": 60 }, "redundancy": { "status": "partial", "score": 60 }, "coverage": { "status": "partial", "score": 60 }, "maintenance": { "status": "conformant", "score": 100 }, "gaps": { "status": "absent", "score": 0, "notes": "Plano da filial não aprovado." } } }
+    },
+    {
+      "key": "politica-de-seguranca-da-informacao",
+      "metadata": { "owner_name": "Carla Souza", "validity_months": 12, "last_reviewed_at": "2026-07-20", "notes": "Política versão 3." },
+      "responses": {
+        "scope": { "mode": "text_or_file", "file": "politica-seguranca-v3.pdf", "objective": "Proteger informações corporativas.", "scope": "Colaboradores e terceiros.", "covered_audiences": ["colaboradores", "fornecedores"], "applicability": "Todo o tenant." },
+        "governance": { "mode": "text", "security_guidelines": "Princípios de confidencialidade, integridade e disponibilidade.", "responsibilities": "TI executa; diretoria aprova.", "policy_owner": "Segurança" },
+        "identity": { "mode": "text", "mfa_policy": "Obrigatório.", "privileged_access_policy": "Contas nominativas.", "password_policy": "Conforme Entra ID.", "access_review_policy": "Trimestral." },
+        "data_protection": { "mode": "text", "information_classification": "Público, interno e restrito.", "data_handling": "Regras documentadas.", "dlp_policy": "Em implantação.", "retention_policy": "Retenção definida." },
+        "privacy": { "mode": "text", "dpo_defined": false, "personal_data_inventory": "Parcial.", "privacy_guidelines": "Em revisão.", "incident_notification": "Não formalizada." },
+        "continuity": { "mode": "text_or_file", "file": "politica-seguranca-v3.pdf", "backup_policy_exists": true, "retention_definition": "30 dias", "restore_testing": "semestral", "disaster_recovery_reference": "DR-2026" },
+        "workplace": { "mode": "text", "byod_policy": "Parcial.", "device_management": "Intune para dispositivos corporativos.", "acceptable_use": "Política aceita no onboarding." },
+        "approval": { "mode": "text", "formal_approval": true, "approved_at": "2026-07-20", "review_frequency": "anual", "next_review_at": "2027-07-20" },
+        "gaps": { "mode": "text", "known_gaps": "DPO pendente.", "related_documents": ["DR-2026"], "remediation_plan": "Nomear DPO." }
+      },
+      "review": { "topic_status": "completed", "topic_score": 74, "reviewed_by": "william.bandeira@contoso.example", "reviewed_at": "2026-07-24T15:00:00Z", "sections": { "scope": { "status": "conformant", "score": 100 }, "governance": { "status": "conformant", "score": 100 }, "identity": { "status": "partial", "score": 60 }, "data_protection": { "status": "conformant", "score": 100 }, "privacy": { "status": "absent", "score": 0, "notes": "DPO não definido." }, "continuity": { "status": "conformant", "score": 100 }, "workplace": { "status": "partial", "score": 60 }, "approval": { "status": "conformant", "score": 100 }, "gaps": { "status": "absent", "score": 0 } } }
+    },
+    {
+      "key": "procedimentos-de-controle-de-acessos",
+      "metadata": { "owner_name": "William Bandeira", "validity_months": 6, "last_reviewed_at": "2026-07-18", "notes": "Procedimento JML." },
+      "responses": {
+        "scope": { "mode": "text", "covered_flows": ["onboarding", "alteração", "offboarding"], "participating_areas": ["RH", "TI", "Gestores"], "covered_systems": ["Microsoft 365", "ERP"] },
+        "request": { "mode": "text_or_file", "file": "procedimento-jml.docx", "request_channels": ["ITSM"], "requester_identification": "Gestor responsável", "required_justification": "Necessidade de negócio." },
+        "approval": { "mode": "text", "approver_rules": "Dono do sistema.", "segregation_of_duties": "Solicitante não aprova.", "approval_evidence": "Registro no ITSM." },
+        "provisioning": { "mode": "text", "provisioning_process": "TI provisiona após aprovação.", "change_process": "Gestor solicita alteração.", "executor": "Service Desk" },
+        "revocation": { "mode": "text_or_file", "file": "procedimento-jml.docx", "offboarding_process": "RH aciona TI.", "revocation_sla": "8 horas", "periodic_cleanup": "Mensal." },
+        "sla": { "mode": "text", "target_sla": "8 horas", "measured_sla": "não medido", "operational_controls": "Fila monitorada.", "monitoring": "Relatório mensal." },
+        "evidence": { "mode": "text", "audit_trail": "ITSM mantém histórico.", "request_records": "12 meses", "approval_records": "12 meses" },
+        "exceptions": { "mode": "text", "exceptions": "Acesso emergencial.", "risks": "SLA não medido.", "remediation_plan": "Criar KPI." }
+      },
+      "review": { "topic_status": "completed", "topic_score": 71, "reviewed_by": "william.bandeira@contoso.example", "reviewed_at": "2026-07-24T15:00:00Z", "sections": { "scope": { "status": "conformant", "score": 100 }, "request": { "status": "conformant", "score": 100 }, "approval": { "status": "partial", "score": 60 }, "provisioning": { "status": "partial", "score": 60 }, "revocation": { "status": "partial", "score": 60 }, "sla": { "status": "partial", "score": 60, "notes": "SLA ainda não medido." }, "evidence": { "status": "conformant", "score": 100 }, "exceptions": { "status": "absent", "score": 0 } } }
+    },
+    {
+      "key": "documentacao-de-processos-de-ti",
+      "metadata": { "owner_name": "Ana Martins", "validity_months": 12, "last_reviewed_at": "2026-07-01", "notes": "Catálogo operacional." },
+      "responses": {
+        "scope": { "mode": "text_or_file", "file": "catalogo-processos.xlsx", "covered_processes": ["incidentes", "mudanças", "ativos"], "process_categories": ["operação", "segurança"], "coverage_percent": 70 },
+        "incident": { "mode": "text_or_file", "file": "processo-incidentes.pdf", "incident_process": "Documentado.", "critical_incident_flow": "Escalonamento definido.", "escalation": "Gestor de TI.", "communication": "Teams e e-mail." },
+        "change": { "mode": "text", "change_process": "Parcial.", "problem_process": "Parcial.", "approval_flow": "CAB mensal.", "post_incident_review": "Somente críticos." },
+        "lifecycle": { "mode": "text", "asset_process": "Documentado.", "risk_process": "Não documentado.", "continuity_process": "Parcial." },
+        "kpis": { "mode": "text", "defined_kpis": ["SLA", "disponibilidade"], "sla_kpis": "Mensal", "availability_kpis": "Mensal", "security_kpis": "Não definido", "cost_kpis": "Não definido" },
+        "ownership": { "mode": "text", "process_owners": "Definidos por processo.", "document_repository": "SharePoint interno.", "document_standard": "Template corporativo." },
+        "versioning": { "mode": "text", "versioning_method": "Controle de versão SharePoint.", "review_frequency": "anual", "last_review_at": "2026-07-01" },
+        "gaps": { "mode": "text", "operational_coverage": 70, "priority_gaps": "Riscos e custos.", "remediation_plan": "Documentar até Q4." }
+      },
+      "review": { "topic_status": "completed", "topic_score": 57, "reviewed_by": "william.bandeira@contoso.example", "reviewed_at": "2026-07-24T15:00:00Z", "sections": { "scope": { "status": "conformant", "score": 100 }, "incident": { "status": "partial", "score": 60 }, "change": { "status": "partial", "score": 60 }, "lifecycle": { "status": "absent", "score": 0, "notes": "Gestão de riscos não documentada." }, "kpis": { "status": "partial", "score": 60 }, "ownership": { "status": "conformant", "score": 100 }, "versioning": { "status": "conformant", "score": 100 }, "gaps": { "status": "absent", "score": 0 } } }
+    },
+    {
+      "key": "relatorios-de-diagnostico-e-recomendacoes",
+      "metadata": { "owner_name": "Bruno Costa", "validity_months": 3, "last_reviewed_at": "2026-07-22", "notes": "Relatório mensal." },
+      "responses": {
+        "scope": { "mode": "text", "assessed_topics": ["segurança", "licenças", "backup"], "data_sources": ["Graph", "inventários"], "assessment_period": "2026-07", "methodology_reference": "Maturidade operacional V1" },
+        "findings": { "mode": "text_or_file", "file": "diagnostico-julho.pdf", "findings": "MFA parcial e licenças ociosas.", "risk_level": "alto", "affected_area": "Segurança", "supporting_evidence": "Relatório Graph." },
+        "recommendations": { "mode": "text", "recommendation": "Expandir MFA.", "expected_outcome": "Reduzir risco.", "estimated_effort": "médio", "dependencies": "Patrocínio executivo." },
+        "prioritization": { "mode": "text", "priority": "alta", "business_impact": "alto", "urgency": "30 dias", "decision_owner": "Diretoria" },
+        "action_tracking": { "mode": "text", "action_owner": "Segurança", "due_date": "2026-08-31", "action_status": "em_andamento", "progress_percent": 35 },
+        "closure": { "mode": "text", "open_items": "MFA e DPO.", "next_steps": "Revisar em agosto.", "follow_up_date": "2026-08-31", "escalation": "Diretoria." }
+      },
+      "review": { "topic_status": "completed", "topic_score": 74, "reviewed_by": "william.bandeira@contoso.example", "reviewed_at": "2026-07-24T15:00:00Z", "sections": { "scope": { "status": "conformant", "score": 100 }, "findings": { "status": "conformant", "score": 100 }, "recommendations": { "status": "partial", "score": 60 }, "prioritization": { "status": "partial", "score": 60 }, "action_tracking": { "status": "partial", "score": 60 }, "closure": { "status": "partial", "score": 60 } } }
+    }
+  ],
+  "aggregate": { "score": 72, "calculation": "Média simples dos oito topic_score já calculados." }
+}

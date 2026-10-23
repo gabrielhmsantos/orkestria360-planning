@@ -1,0 +1,7 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — Falhas de autenticação, version: v1 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /auditLogs/signIns:
+    get: { summary: Sign-ins para classificação local de falhas, security: [{ graphApp: [AuditLog.Read.All] }], parameters: [{ name: '$filter', in: query, schema: { type: string } }, { name: '$top', in: query, schema: { type: integer, maximum: 1000 } }], responses: { '200': { description: 'Coleção OData paginável validada; campos de falha são variáveis' }, '403': { description: Fonte restrita }, '429': { description: 'Throttling; respeitar Retry-After' } } }
+components: { securitySchemes: { graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token', scopes: { 'https://graph.microsoft.com/.default': AuditLog.Read.All } } } } } }

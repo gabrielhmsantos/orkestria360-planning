@@ -1,0 +1,42 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — OneDrive, version: v1.0 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /reports/getOneDriveUsageAccountDetail(period='{period}'):
+    get:
+      summary: Detalhe de uso do OneDrive por conta
+      security: [{ graphApp: [Reports.Read.All] }]
+      parameters: [{ $ref: '#/components/parameters/AcceptCsv' }, { $ref: '#/components/parameters/ReportPeriod' }]
+      responses: { '302': { $ref: '#/components/responses/ReportRedirect' }, '403': { $ref: '#/components/responses/GraphError' }, '429': { $ref: '#/components/responses/GraphError' } }
+  /reports/getOneDriveActivityUserDetail(period='{period}'):
+    get:
+      summary: Atividade do OneDrive por usuário
+      security: [{ graphApp: [Reports.Read.All] }]
+      parameters: [{ $ref: '#/components/parameters/AcceptCsv' }, { $ref: '#/components/parameters/ReportPeriod' }]
+      responses: { '302': { $ref: '#/components/responses/ReportRedirect' }, '403': { $ref: '#/components/responses/GraphError' }, '429': { $ref: '#/components/responses/GraphError' } }
+  /reports/getOneDriveUsageFileCounts(period='{period}'):
+    get:
+      summary: Contagens agregadas de arquivos OneDrive
+      security: [{ graphApp: [Reports.Read.All] }]
+      parameters: [{ $ref: '#/components/parameters/AcceptCsv' }, { $ref: '#/components/parameters/ReportPeriod' }]
+      responses: { '302': { $ref: '#/components/responses/ReportRedirect' }, '403': { $ref: '#/components/responses/GraphError' }, '429': { $ref: '#/components/responses/GraphError' } }
+components:
+  parameters:
+    ReportPeriod: { name: period, in: path, required: true, schema: { type: string, enum: [D7, D30, D90, D180] } }
+    AcceptCsv: { name: Accept, in: header, required: true, schema: { type: string, const: text/csv } }
+  securitySchemes:
+    graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token', scopes: { Reports.Read.All: Le relatórios Microsoft 365 } } } }
+  responses:
+    ReportRedirect:
+      description: URL pré-autenticada, opaca e temporária para CSV; não persistir nem reenviar Authorization.
+      headers: { Location: { required: true, schema: { type: string, format: uri } } }
+      x-post-redirect-download:
+        method: GET
+        authorization: forbidden
+        persistence: forbidden
+        response:
+          '200':
+            content:
+              application/octet-stream:
+                schema: { type: string, format: binary, description: CSV UTF-8 com BOM possível; linhas não são persistidas. }
+    GraphError: { description: Erro Microsoft Graph, content: { application/json: { schema: { type: object } } } }

@@ -1,0 +1,8 @@
+# Segurança e Compliance — Decisões
+
+- O baseline de segurança cita MFA de administradores, bloqueio de autenticação legada, Acesso Condicional, Safe Links/Attachments, antiphishing, DLP, auditoria, compartilhamento e dispositivos — sponsor.
+- Graph Security não substitui as APIs/PowerShell de todas as configurações administrativas Defender e Purview — sponsor.
+- Para Tenant Configuration Management, a fonte candidata adotada é Microsoft Graph **`beta`** com `ConfigurationMonitoring.Read.All` app-only: o contrato beta suporta essa permission, enquanto o contrato `v1.0` da mesma coleção não a suporta para Application. É uma decisão de fonte, não de cobertura: o Orkestria não cria snapshots TCM e só pode publicar fatos de antiphishing/conector a partir de snapshot já disponível e legível. Até lá, o controle permanece indisponível, sem valor inferido.
+- As roles Entra requeridas pelo workload Exchange são atribuídas ao service principal Microsoft TCM (`03b07b79-c5bc-4b5e-9bfa-13acf4a99998`), não ao Orkestria 360: `Security Reader` para `antiPhishPolicy`/`antiPhishRule` e `Global Reader` para conectores. Esta é uma regra documentada pelo Microsoft Learn, ainda sem payload Exchange observado nos tenants de validação.
+- O onboarding de `Security Reader` para o principal TCM requer manual equivalente ao de Global Reader antes de habilitar a coleta antiphishing; esse manual ainda não foi criado.
+- Clarificação — Q: contribuição de antiphishing/conector sem TCM ou role necessária → A: o controle permanece `unavailable`, não ativa trava e não afirma estado inseguro; se a linha homologada for elegível, entra no denominador do score com zero pontos e reduz cobertura (origem: usuário; data: 2026-08-25).

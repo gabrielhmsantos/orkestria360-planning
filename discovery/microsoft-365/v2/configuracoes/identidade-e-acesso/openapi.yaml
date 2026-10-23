@@ -1,0 +1,125 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph - Identidade e Acesso, version: v1 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /identity/conditionalAccess/policies:
+    get:
+      summary: Politicas de acesso condicional
+      security: [{ graphApp: [Policy.Read.All] }]
+      parameters: [{ $ref: '#/components/parameters/Top' }]
+      responses: { '200': { description: 'Colecao OData, inclusive vazia valida', content: { application/json: { schema: { $ref: '#/components/schemas/ConditionalAccessPolicyCollection' } } } }, '403': { $ref: '#/components/responses/GraphError' } }
+  /identity/conditionalAccess/policies/{policy-id}:
+    get:
+      summary: Politica individual de acesso condicional
+      x-consumed-directly: false
+      security: [{ graphApp: [Policy.Read.All] }]
+      parameters: [{ name: policy-id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: Politica de acesso condicional, content: { application/json: { schema: { $ref: '#/components/schemas/ConditionalAccessPolicy' } } } }, '403': { $ref: '#/components/responses/GraphError' }, '404': { $ref: '#/components/responses/GraphError' } }
+  /identity/conditionalAccess/namedLocations:
+    get:
+      summary: Localizacoes nomeadas
+      security: [{ graphApp: [Policy.Read.All] }]
+      parameters: [{ $ref: '#/components/parameters/Top' }]
+      responses: { '200': { description: 'Colecao OData, inclusive vazia valida', content: { application/json: { schema: { $ref: '#/components/schemas/NamedLocationCollection' } } } }, '403': { $ref: '#/components/responses/GraphError' } }
+  /policies/authenticationMethodsPolicy:
+    get:
+      summary: Politica de metodos de autenticacao
+      security: [{ graphApp: [Policy.Read.AuthenticationMethod] }]
+      responses: { '200': { description: Politica com configuracoes de metodos, content: { application/json: { schema: { $ref: '#/components/schemas/AuthenticationMethodsPolicy' } } } }, '403': { $ref: '#/components/responses/GraphError' } }
+  /policies/authenticationMethodsPolicy/authenticationMethodConfigurations:
+    get:
+      summary: Configuracoes de metodos de autenticacao
+      x-consumed-directly: false
+      security: [{ graphApp: [Policy.Read.AuthenticationMethod] }]
+      responses: { '400': { $ref: '#/components/responses/GraphError' }, '403': { $ref: '#/components/responses/GraphError' } }
+  /users/{user-id}:
+    get:
+      summary: Usuario individual
+      x-consumed-directly: false
+      security: [{ graphApp: [User.Read.All] }]
+      parameters: [{ name: user-id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: Entidade usuario, content: { application/json: { schema: { $ref: '#/components/schemas/DirectoryUser' } } } }, '403': { $ref: '#/components/responses/GraphError' }, '404': { $ref: '#/components/responses/GraphError' } }
+  /directoryRoles:
+    get:
+      summary: Funcoes administrativas ativas
+      x-consumed-directly: false
+      security: [{ graphApp: [RoleManagement.Read.Directory] }]
+      responses: { '200': { description: Colecao OData de funcoes, content: { application/json: { schema: { $ref: '#/components/schemas/DirectoryRoleCollection' } } } }, '403': { $ref: '#/components/responses/GraphError' } }
+  /roleManagement/directory/roleAssignments:
+    get:
+      summary: Atribuicoes diretas de roles do Microsoft Entra ID
+      x-consumed-directly: false
+      security: [{ graphApp: [RoleManagement.Read.Directory] }]
+      parameters: [{ $ref: '#/components/parameters/ExpandRoleAssignment' }]
+      responses:
+        '200': { description: Colecao OData paginada de atribuicoes diretas, content: { application/json: { schema: { $ref: '#/components/schemas/UnifiedRoleAssignmentCollection' } } } }
+        '400': { $ref: '#/components/responses/GraphError' }
+        '401': { $ref: '#/components/responses/GraphError' }
+        '403': { $ref: '#/components/responses/GraphError' }
+        '429': { $ref: '#/components/responses/GraphError' }
+components:
+  parameters:
+    Top: { name: $top, in: query, schema: { type: integer, minimum: 1 } }
+    ExpandRoleAssignment: { name: $expand, in: query, description: 'Uma unica expansao por requisicao: principal ou roleDefinition.', schema: { type: string, enum: [principal, roleDefinition] } }
+  securitySchemes:
+    graphApp:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token
+          scopes: { 'https://graph.microsoft.com/.default': Consentimentos Graph }
+  responses:
+    GraphError: { description: Erro Microsoft Graph, content: { application/json: { schema: { $ref: '#/components/schemas/GraphError' } } } }
+  schemas:
+    GraphError: { type: object, required: [error], properties: { error: { type: object, required: [code, message], properties: { code: { type: string }, message: { type: string }, innerError: { type: object, additionalProperties: true } } } } }
+    ODataCollection:
+      type: object
+      required: [value]
+      properties: { '@odata.context': { type: string }, '@odata.nextLink': { type: string, format: uri }, value: { type: array } }
+    ConditionalAccessPolicyCollection:
+      allOf: [{ $ref: '#/components/schemas/ODataCollection' }, { type: object, properties: { value: { type: array, items: { $ref: '#/components/schemas/ConditionalAccessPolicy' } } } }]
+    ConditionalAccessPolicy:
+      type: object
+      properties: { id: { type: string }, displayName: { type: string }, state: { type: string }, createdDateTime: { type: string, format: date-time }, modifiedDateTime: { type: string, format: date-time }, conditions: { type: object, additionalProperties: true }, grantControls: { type: object, additionalProperties: true }, sessionControls: { type: object, additionalProperties: true } }
+    NamedLocationCollection:
+      allOf: [{ $ref: '#/components/schemas/ODataCollection' }, { type: object, properties: { value: { type: array, items: { $ref: '#/components/schemas/NamedLocation' } } } }]
+    NamedLocation:
+      type: object
+      properties: { '@odata.type': { type: string }, id: { type: string }, displayName: { type: string }, createdDateTime: { type: string, format: date-time }, modifiedDateTime: { type: string, format: date-time }, isTrusted: { type: boolean }, ipRanges: { type: array, items: { type: object, additionalProperties: true } }, countriesAndRegions: { type: array, items: { type: string } }, includeUnknownCountriesAndRegions: { type: boolean } }
+    AuthenticationMethodsPolicy:
+      type: object
+      properties: { id: { type: string }, displayName: { type: string }, description: { type: string }, policyVersion: { type: string }, registrationEnforcement: { type: object, additionalProperties: true }, authenticationMethodConfigurations: { type: array, items: { $ref: '#/components/schemas/AuthenticationMethodConfiguration' } } }
+    AuthenticationMethodConfiguration:
+      type: object
+      properties: { id: { type: string }, state: { type: string }, includeTargets: { type: array, items: { type: object, additionalProperties: true } }, excludeTargets: { type: array, items: { type: object, additionalProperties: true } } }
+    DirectoryUser:
+      type: object
+      properties: { id: { type: string }, businessPhones: { type: array, items: { type: string }, x-pii: true }, displayName: { type: string, x-pii: true }, givenName: { type: string, x-pii: true }, surname: { type: string, x-pii: true }, userPrincipalName: { type: string, x-pii: true }, mail: { type: string, x-pii: true }, mobilePhone: { type: string, x-pii: true }, accountEnabled: { type: boolean }, userType: { type: string }, department: { type: string }, jobTitle: { type: string }, officeLocation: { type: string }, preferredLanguage: { type: string }, usageLocation: { type: string }, onPremisesSyncEnabled: { type: boolean }, createdDateTime: { type: string, format: date-time }, assignedLicenses: { type: array, items: { type: object, additionalProperties: true } }, assignedPlans: { type: array, items: { type: object, additionalProperties: true } }, licenseAssignmentStates: { type: array, items: { type: object, additionalProperties: true } } }
+    DirectoryRoleCollection:
+      allOf: [{ $ref: '#/components/schemas/ODataCollection' }, { type: object, properties: { value: { type: array, items: { $ref: '#/components/schemas/DirectoryRole' } } } }]
+    DirectoryRole:
+      type: object
+      properties: { id: { type: string }, displayName: { type: string }, description: { type: [string, 'null'] }, roleTemplateId: { type: string }, deletedDateTime: { type: [string, 'null'], format: date-time } }
+    UnifiedRoleAssignmentCollection:
+      allOf: [{ $ref: '#/components/schemas/ODataCollection' }, { type: object, properties: { value: { type: array, items: { $ref: '#/components/schemas/UnifiedRoleAssignment' } } } }]
+    UnifiedRoleAssignment:
+      type: object
+      required: [id, principalId, roleDefinitionId]
+      properties:
+        id: { type: string }
+        principalId: { type: string, x-pii: true }
+        principalOrganizationId: { type: [string, 'null'] }
+        directoryScopeId: { type: [string, 'null'] }
+        appScopeId: { type: [string, 'null'] }
+        roleDefinitionId: { type: string }
+        principal: { $ref: '#/components/schemas/RoleAssignmentPrincipal' }
+        roleDefinition: { $ref: '#/components/schemas/RoleDefinition' }
+    RoleAssignmentPrincipal:
+      type: object
+      description: 'Objeto de diretorio retornado apenas com $expand=principal; pode conter PII adicional conforme o tipo do principal.'
+      properties: { id: { type: string, x-pii: true }, '@odata.type': { type: string }, displayName: { type: string, x-pii: true } }
+      additionalProperties: true
+    RoleDefinition:
+      type: object
+      description: 'Definicao retornada apenas com $expand=roleDefinition.'
+      properties: { id: { type: string }, displayName: { type: string }, description: { type: [string, 'null'] }, isBuiltIn: { type: boolean }, isEnabled: { type: boolean } }

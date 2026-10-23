@@ -1,0 +1,4 @@
+interface:
+  display_name: "Validate Graph"
+  short_description: "Valide APIs Microsoft externas"
+  default_prompt: "Use $validate-graph para validar uma API Microsoft externa e sua viabilidade para o contrato semântico do discovery."

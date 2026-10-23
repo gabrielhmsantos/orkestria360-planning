@@ -1,0 +1,29 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — Histórico e Auditoria, version: v1 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /auditLogs/directoryAudits:
+    get:
+      summary: Eventos de auditoria de diretório
+      security: [{ graphApp: [] }]
+      parameters:
+        - { name: '$top', in: query, schema: { type: integer, maximum: 999 } }
+        - { name: '$orderby', in: query, schema: { type: string, example: 'activityDateTime desc' } }
+        - { name: '$filter', in: query, description: 'Somente campos e sintaxe aceitos pelo Graph', schema: { type: string } }
+      responses:
+        '200': { description: Coleção JSON paginável; cada evento preserva ator, alvo, resultado e data, content: { application/json: { schema: { type: object } } } }
+        '403': { description: Sem AuditLog.Read.All }
+        '429': { description: Throttling; respeitar Retry-After }
+  /auditLogs/signIns:
+    get:
+      summary: Eventos de autenticação
+      security: [{ graphApp: [] }]
+      parameters:
+        - { name: '$top', in: query, description: 'Primeira página da coleta diária; não seguir nextLink.', schema: { type: integer, maximum: 100, default: 100 } }
+        - { name: '$orderby', in: query, schema: { type: string, example: 'createdDateTime desc' } }
+        - { name: '$filter', in: query, description: 'Somente campos e sintaxe aceitos pelo Graph', schema: { type: string } }
+      responses:
+        '200': { description: Coleção OData de sign-ins; a coleta persiste somente a primeira página de até 100 itens, content: { application/json: { schema: { type: object } } } }
+        '403': { description: Fonte restrita por permissão/licença }
+        '429': { description: Throttling; respeitar Retry-After }
+components: { securitySchemes: { graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token', scopes: { 'https://graph.microsoft.com/.default': AuditLog.Read.All } } } } } }

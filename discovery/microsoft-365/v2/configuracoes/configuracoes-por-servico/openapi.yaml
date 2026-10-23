@@ -1,0 +1,78 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph - Configuracoes por Servico, version: v1 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /deviceManagement/configurationPolicies:
+    get:
+      summary: Politicas de configuracao Intune
+      servers: [{ url: https://graph.microsoft.com/beta }]
+      security: [{ graphApp: [DeviceManagementConfiguration.Read.All] }]
+      responses: { '200': { description: Colecao OData documentada pelo Graph, content: { application/json: { schema: { $ref: '#/components/schemas/ConfigurationPolicyCollection' } } } }, '401': { $ref: '#/components/responses/GraphError' } }
+  /deviceManagement/deviceCompliancePolicies:
+    get:
+      summary: Politicas de conformidade Intune
+      security: [{ graphApp: [DeviceManagementConfiguration.Read.All] }]
+      parameters: [{ $ref: '#/components/parameters/Top' }]
+      responses: { '200': { description: Colecao OData documentada pelo Graph, content: { application/json: { schema: { $ref: '#/components/schemas/DeviceCompliancePolicyCollection' } } } }, '401': { $ref: '#/components/responses/GraphError' } }
+  /deviceManagement/deviceConfigurations:
+    get:
+      summary: Configuracoes de dispositivo Intune
+      security: [{ graphApp: [DeviceManagementConfiguration.Read.All] }]
+      parameters: [{ $ref: '#/components/parameters/Top' }]
+      responses: { '200': { description: Colecao OData documentada pelo Graph, content: { application/json: { schema: { $ref: '#/components/schemas/DeviceConfigurationCollection' } } } }, '401': { $ref: '#/components/responses/GraphError' } }
+  /deviceManagement/intents:
+    get:
+      summary: Intencoes Intune
+      servers: [{ url: https://graph.microsoft.com/beta }]
+      security: [{ graphApp: [DeviceManagementConfiguration.Read.All] }]
+      responses: { '200': { description: Colecao OData documentada pelo Graph, content: { application/json: { schema: { $ref: '#/components/schemas/DeviceManagementIntentCollection' } } } }, '401': { $ref: '#/components/responses/GraphError' } }
+  /deviceManagement/groupPolicyConfigurations:
+    get:
+      summary: Configuracoes de Group Policy Intune
+      servers: [{ url: https://graph.microsoft.com/beta }]
+      security: [{ graphApp: [DeviceManagementConfiguration.Read.All] }]
+      responses: { '200': { description: Colecao OData documentada pelo Graph, content: { application/json: { schema: { $ref: '#/components/schemas/GroupPolicyConfigurationCollection' } } } }, '401': { $ref: '#/components/responses/GraphError' } }
+components:
+  parameters:
+    Top: { name: $top, in: query, schema: { type: integer, minimum: 1 } }
+  securitySchemes:
+    graphApp:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token
+          scopes: { 'https://graph.microsoft.com/.default': Consentimentos Graph }
+  responses:
+    GraphError: { description: Erro Microsoft Graph, content: { application/json: { schema: { $ref: '#/components/schemas/GraphError' } } } }
+  schemas:
+    GraphError: { type: object, required: [error], properties: { error: { type: object, required: [code, message], properties: { code: { type: string }, message: { type: string }, innerError: { type: object, additionalProperties: true } } } } }
+    ODataCollection:
+      type: object
+      required: [value]
+      properties: { '@odata.context': { type: string }, '@odata.nextLink': { type: string, format: uri }, value: { type: array } }
+    ConfigurationPolicyCollection:
+      allOf: [{ $ref: '#/components/schemas/ODataCollection' }, { type: object, properties: { value: { type: array, items: { $ref: '#/components/schemas/ConfigurationPolicy' } } } }]
+    ConfigurationPolicy:
+      type: object
+      properties: { id: { type: string }, name: { type: string }, description: { type: string }, platforms: { type: string }, technologies: { type: string }, createdDateTime: { type: string, format: date-time }, lastModifiedDateTime: { type: string, format: date-time }, settingCount: { type: integer }, creationSource: { type: string }, roleScopeTagIds: { type: array, items: { type: string } }, isAssigned: { type: boolean }, templateReference: { type: object, additionalProperties: true }, priorityMetaData: { type: object, additionalProperties: true } }
+    DeviceCompliancePolicyCollection:
+      allOf: [{ $ref: '#/components/schemas/ODataCollection' }, { type: object, properties: { value: { type: array, items: { $ref: '#/components/schemas/DeviceCompliancePolicy' } } } }]
+    DeviceCompliancePolicy:
+      type: object
+      properties: { '@odata.type': { type: string }, id: { type: string }, createdDateTime: { type: string, format: date-time }, description: { type: string }, lastModifiedDateTime: { type: string, format: date-time }, displayName: { type: string }, version: { type: integer } }
+    DeviceConfigurationCollection:
+      allOf: [{ $ref: '#/components/schemas/ODataCollection' }, { type: object, properties: { value: { type: array, items: { $ref: '#/components/schemas/DeviceConfiguration' } } } }]
+    DeviceConfiguration:
+      type: object
+      properties: { '@odata.type': { type: string }, id: { type: string }, displayName: { type: string }, description: { type: string }, createdDateTime: { type: string, format: date-time }, lastModifiedDateTime: { type: string, format: date-time }, version: { type: integer } }
+    DeviceManagementIntentCollection:
+      allOf: [{ $ref: '#/components/schemas/ODataCollection' }, { type: object, properties: { value: { type: array, items: { $ref: '#/components/schemas/DeviceManagementIntent' } } } }]
+    DeviceManagementIntent:
+      type: object
+      x-observed: false
+      properties: { '@odata.type': { type: string }, id: { type: string }, displayName: { type: string }, description: { type: string }, isAssigned: { type: boolean }, isMigratingToConfigurationPolicy: { type: boolean }, lastModifiedDateTime: { type: string, format: date-time }, templateId: { type: string }, roleScopeTagIds: { type: array, items: { type: string } } }
+    GroupPolicyConfigurationCollection:
+      allOf: [{ $ref: '#/components/schemas/ODataCollection' }, { type: object, properties: { value: { type: array, items: { $ref: '#/components/schemas/GroupPolicyConfiguration' } } } }]
+    GroupPolicyConfiguration:
+      type: object
+      properties: { id: { type: string }, displayName: { type: string }, description: { type: string }, createdDateTime: { type: string, format: date-time }, lastModifiedDateTime: { type: string, format: date-time }, policyConfigurationIngestionType: { type: string }, roleScopeTagIds: { type: array, items: { type: string } } }

@@ -1,0 +1,153 @@
+openapi: 3.1.0
+info:
+  title: Microsoft Graph — OneDrive accounts and storage
+  version: v1.0
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /reports/getOneDriveUsageAccountDetail(period='{period}'):
+    $ref: '#/components/pathItems/AccountDetailReport'
+  /reports/getOneDriveUsageAccountCounts(period='{period}'):
+    $ref: '#/components/pathItems/AccountCountsReport'
+  /reports/getOneDriveUsageFileCounts(period='{period}'):
+    $ref: '#/components/pathItems/AccountCountsReport'
+  /users:
+    get:
+      security: [{ graphApp: [User.Read.All] }]
+      parameters:
+        - { name: '$select', in: query, required: true, schema: { type: string, const: 'id,displayName,userPrincipalName,accountEnabled,assignedLicenses,department,userType,createdDateTime' } }
+      responses:
+        '200':
+          description: Envelope OData de usuários; `@odata.nextLink` é opaco. Observado por GET temporário.
+          x-observed: true
+          content: { application/json: { schema: { $ref: '#/components/schemas/UserCollection' } } }
+        '401': { $ref: '#/components/responses/GraphError' }
+        '403': { $ref: '#/components/responses/GraphError' }
+        '429': { $ref: '#/components/responses/GraphError' }
+  /users/{user-id}/drives:
+    get:
+      summary: Lista drives disponíveis para correlação da conta OneDrive empresarial
+      description: Coleção suportada em autenticação de aplicação. A normalização não escolhe arbitrariamente um drive quando a correlação é ambígua.
+      security: [{ graphApp: [Files.Read.All] }, { graphApp: [Files.ReadWrite.All] }, { graphApp: [Sites.Read.All] }, { graphApp: [Sites.ReadWrite.All] }]
+      parameters:
+        - { name: user-id, in: path, required: true, schema: { type: string } }
+        - { name: '$select', in: query, required: true, schema: { type: string, const: 'id,driveType,sharepointIds,owner,webUrl,system' } }
+      responses:
+        '200':
+          description: Coleção OData de drives; query observada por GET temporário sanitizado. Links de paginação são opacos.
+          x-observed: true
+          content: { application/json: { schema: { $ref: '#/components/schemas/DriveCollection' } } }
+        '401': { $ref: '#/components/responses/GraphError' }
+        '403': { $ref: '#/components/responses/GraphError' }
+        '404': { $ref: '#/components/responses/GraphError' }
+        '429': { $ref: '#/components/responses/GraphError' }
+components:
+  pathItems:
+    AccountDetailReport:
+      get:
+        security: [{ graphApp: [Reports.Read.All] }]
+        parameters:
+          - { $ref: '#/components/parameters/AcceptCsv' }
+          - { $ref: '#/components/parameters/ReportPeriod' }
+        responses:
+          '302': { $ref: '#/components/responses/CsvRedirect' }
+          '401': { $ref: '#/components/responses/GraphError' }
+          '403': { $ref: '#/components/responses/GraphError' }
+          '429': { $ref: '#/components/responses/GraphError' }
+    AccountCountsReport:
+      get:
+        security: [{ graphApp: [Reports.Read.All] }]
+        parameters:
+          - { $ref: '#/components/parameters/AcceptCsv' }
+          - { $ref: '#/components/parameters/ReportPeriod' }
+        responses:
+          '302': { $ref: '#/components/responses/CsvRedirect' }
+          '401': { $ref: '#/components/responses/GraphError' }
+          '403': { $ref: '#/components/responses/GraphError' }
+          '429': { $ref: '#/components/responses/GraphError' }
+  parameters:
+    AcceptCsv: { name: Accept, in: header, required: true, schema: { type: string, const: text/csv } }
+    ReportPeriod: { name: period, in: path, required: true, schema: { type: string, enum: [D7, D30, D90, D180] } }
+  securitySchemes:
+    graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token', scopes: { Reports.Read.All: Read reports, User.Read.All: Read users, Directory.Read.All: Read directory data, Files.Read.All: Read all files, Files.ReadWrite.All: Read and write all files, Sites.Read.All: Read all sites, Sites.ReadWrite.All: Read and write all sites } } } }
+  responses:
+    CsvRedirect:
+      description: Redirect para CSV pré-autenticado. O segundo GET não recebe Authorization.
+      headers: { Location: { required: true, schema: { type: string, format: uri } } }
+      x-observed: true
+      x-post-redirect-download: { method: GET, authorization: forbidden, response: { '200': { content: { application/octet-stream: { schema: { type: string, format: binary } } } } } }
+    GraphError: { description: Erro Graph, content: { application/json: { schema: { $ref: '#/components/schemas/GraphError' } } } }
+  schemas:
+    UserCollection:
+      type: object
+      required: [value]
+      properties:
+        '@odata.context': { type: string, format: uri }
+        '@odata.nextLink': { type: string, format: uri }
+        value: { type: array, items: { $ref: '#/components/schemas/User' } }
+    User:
+      type: object
+      required: [id]
+      properties:
+        id: { type: string }
+        displayName: { type: [string, 'null'] }
+        userPrincipalName: { type: [string, 'null'] }
+        accountEnabled: { type: [boolean, 'null'] }
+        assignedLicenses:
+          type: array
+          items:
+            type: object
+            properties:
+              skuId: { type: string }
+              disabledPlans: { type: array, items: { type: string } }
+            additionalProperties: true
+        department: { type: [string, 'null'] }
+        userType: { type: [string, 'null'] }
+        createdDateTime: { type: [string, 'null'], format: date-time }
+    DriveCollection:
+      type: object
+      required: [value]
+      properties:
+        '@odata.context': { type: string, format: uri }
+        '@odata.nextLink': { type: string, format: uri }
+        value: { type: array, items: { $ref: '#/components/schemas/Drive' } }
+    Drive:
+      type: object
+      required: [id]
+      properties:
+        id: { type: string }
+        driveType: { type: string, enum: [personal, business, documentLibrary] }
+        webUrl: { type: string, format: uri }
+        owner: { $ref: '#/components/schemas/IdentitySet' }
+        sharepointIds: { $ref: '#/components/schemas/SharePointIds' }
+        sharePointIds: { $ref: '#/components/schemas/SharePointIds', description: Grafia observada na resposta sanitizada; variante do membro documentado sharepointIds. }
+        system: { type: object, description: Faceta opcional de drive gerenciado pelo sistema., additionalProperties: true }
+    IdentitySet:
+      type: object
+      properties:
+        user: { $ref: '#/components/schemas/Identity' }
+        application: { $ref: '#/components/schemas/Identity' }
+        device: { $ref: '#/components/schemas/Identity' }
+        group: { $ref: '#/components/schemas/Identity' }
+      additionalProperties: true
+    Identity:
+      type: object
+      properties:
+        id: { type: string }
+        displayName: { type: string }
+        email: { type: string }
+      additionalProperties: true
+    SharePointIds:
+      type: object
+      properties:
+        siteId: { type: string, description: GUID da site collection SPSite; não é o ID composto de site do Graph. }
+        webId: { type: string, description: GUID do SPWeb. }
+        siteUrl: { type: string, format: uri }
+        listId: { type: string }
+        listItemId: { type: string }
+        listItemUniqueId: { type: string }
+        tenantId: { type: string }
+      additionalProperties: true
+    GraphError:
+      type: object
+      required: [error]
+      properties: { error: { type: object, required: [code, message], properties: { code: { type: string }, message: { type: string }, innerError: { type: object, additionalProperties: true } } } }

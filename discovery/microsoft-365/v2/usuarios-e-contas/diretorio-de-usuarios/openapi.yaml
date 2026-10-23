@@ -1,0 +1,79 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — Diretório de Usuários, version: v1 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /users:
+    get: { summary: Lista de identidades, security: [{ graphApp: [] }], parameters: [{ $ref: '#/components/parameters/top' }, { $ref: '#/components/parameters/select' }, { $ref: '#/components/parameters/expand' }, { $ref: '#/components/parameters/filter' }], responses: { '200': { $ref: '#/components/responses/collection' } } }
+  /users/{user-id}/manager:
+    get: { summary: Gestor da identidade, security: [{ graphApp: [] }], parameters: [{ $ref: '#/components/parameters/userId' }], responses: { '200': { $ref: '#/components/responses/entity' }, '404': { description: Usuário sem gestor } } }
+  /users/{user-id}/licenseDetails:
+    get: { summary: Detalhes de licença; 200 revalidado em client credentials, security: [{ graphApp: [] }], parameters: [{ $ref: '#/components/parameters/userId' }], responses: { '200': { $ref: '#/components/responses/licenseDetails' }, '403': { description: Usar atribuições em /users; matriz Learn ainda declara app-only não suportado } } }
+  /users/delta:
+    get: { summary: Sincronização incremental; persistir deltaLink e seguir nextLink opacos, description: 'Itens podem repetir; mesclar idempotentemente por id. licenseAssignmentStates exige reconciliação completa diária. Snapshot e deltaLink são promovidos atomicamente por tenant, sob lock/CAS.', security: [{ graphApp: [] }], parameters: [{ $ref: '#/components/parameters/select' }], responses: { '200': { $ref: '#/components/responses/collection' }, '403': { description: Sem User.Read.All }, '410': { $ref: '#/components/responses/syncReset' }, '4XX': { $ref: '#/components/responses/syncReset' } } }
+  /reports/authenticationMethods/userRegistrationDetails:
+    get: { summary: Estado MFA por usuário, security: [{ graphApp: [] }], responses: { '200': { $ref: '#/components/responses/collection' }, '403': { description: Fonte restrita } } }
+  /identityProtection/riskyUsers:
+    get: { summary: Estado de risco por usuário, security: [{ graphApp: [] }], responses: { '200': { $ref: '#/components/responses/collection' }, '403': { description: Requer Entra P2 e permissão de risco } } }
+  /auditLogs/signIns:
+    get: { summary: Histórico de autenticação, security: [{ graphApp: [] }], responses: { '200': { $ref: '#/components/responses/collection' }, '403': { description: Fonte restrita }, '429': { description: Throttling; respeitar Retry-After } } }
+components:
+  securitySchemes: { graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token', scopes: { 'https://graph.microsoft.com/.default': Consentimentos Graph da aplicação } } } } }
+  parameters: { top: { name: '$top', in: query, schema: { type: integer, maximum: 500 } }, select: { name: '$select', in: query, schema: { type: string, example: 'id,displayName,userPrincipalName,mail,accountEnabled,userType,department,jobTitle,companyName,employeeId,usageLocation,createdDateTime,assignedLicenses,assignedPlans,licenseAssignmentStates,signInActivity' } }, expand: { name: '$expand', in: query, schema: { type: string, example: 'manager($select=id)' } }, filter: { name: '$filter', in: query, schema: { type: string } }, userId: { name: user-id, in: path, required: true, schema: { type: string } } }
+  responses:
+    collection:
+      description: Coleção Graph
+      content: { application/json: { schema: { $ref: '#/components/schemas/ODataCollection' } } }
+    licenseDetails:
+      description: Detalhes de licença Graph
+      content: { application/json: { schema: { $ref: '#/components/schemas/LicenseDetailsCollection' } } }
+    entity:
+      description: Entidade Graph
+      content: { application/json: { schema: { type: object, additionalProperties: true } } }
+    syncReset:
+      description: 'sync_reset: 410 ou error.code syncStateNotFound; reiniciar sincronização completa idempotente e promover snapshot/deltaLink atomicamente.'
+      headers:
+        Location: { description: 'Quando enviada, URL de delta inicial para reinício; opaca e temporária.', schema: { type: string, format: uri } }
+      content: { application/json: { schema: { $ref: '#/components/schemas/GraphError' } } }
+  schemas:
+    ODataCollection:
+      type: object
+      required: [value]
+      properties:
+        '@odata.context': { type: string }
+        value: { type: array, items: { type: object, additionalProperties: true } }
+        '@odata.nextLink': { type: string }
+        '@odata.deltaLink': { type: string }
+    LicenseDetailsCollection:
+      type: object
+      required: [value]
+      properties:
+        '@odata.context': { type: string }
+        value:
+          type: array
+          items:
+            type: object
+            required: [id, skuId, skuPartNumber, servicePlans]
+            properties:
+              id: { type: string }
+              skuId: { type: string }
+              skuPartNumber: { type: string }
+              servicePlans:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    servicePlanId: { type: string }
+                    servicePlanName: { type: string }
+                    servicePlanType: { type: string }
+                    provisioningStatus: { type: string }
+                    appliesTo: { type: string }
+    GraphError:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code]
+          properties:
+            code: { type: string, example: syncStateNotFound }
+            message: { type: string }

@@ -1,0 +1,20 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — Atividade de Grupos, version: v1 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  "/reports/getOffice365GroupsActivityDetail(period='{period}')":
+    get:
+      summary: Solicita CSV de atividade; sem corpo
+      security: [{ graphApp: [] }]
+      parameters: [{ name: period, in: path, required: true, schema: { type: string, enum: [D7, D30, D90, D180] } }]
+      responses:
+        '302': { description: URL pré-autenticada temporária em Location; não encaminhar Authorization, headers: { Location: { required: true, schema: { type: string, format: uri } } } }
+        '403': { description: Sem Reports.Read.All ou report indisponível }
+        '429': { description: Respeitar Retry-After }
+  /downloaded-report.csv:
+    get:
+      summary: Segunda fase no host de Location, sem Authorization
+      servers: [{ url: '{location-host}', variables: { location-host: { default: 'https://download.example.invalid' } } }]
+      responses: { '200': { description: CSV temporário; não persistir linhas, content: { application/octet-stream: { schema: { type: string, format: binary } } } } }
+components:
+  securitySchemes: { graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token', scopes: { 'https://graph.microsoft.com/.default': Reports.Read.All } } } } }

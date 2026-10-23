@@ -1,0 +1,10 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — Eventos MFA, version: v1 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /auditLogs/signIns:
+    get: { summary: Sign-ins por janela, security: [{ graphApp: [AuditLog.Read.All] }], parameters: [{ name: '$top', in: query, schema: { type: integer, maximum: 1000 } }, { name: '$filter', in: query, schema: { type: string, example: 'createdDateTime ge {start} and createdDateTime lt {end}' } }, { name: '$orderby', in: query, schema: { type: string } }], responses: { '200': { $ref: '#/components/responses/collection' }, '403': { description: Fonte restrita }, '429': { description: 'Throttling; respeitar Retry-After', headers: { Retry-After: { schema: { type: integer } } } } } }
+components:
+  securitySchemes: { graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token', scopes: { 'https://graph.microsoft.com/.default': AuditLog.Read.All; Policy.Read.All para CA } } } } }
+  responses: { collection: { description: 'Coleção OData validada no tenant', content: { application/json: { schema: { $ref: '#/components/schemas/ODataCollection' } } } } }
+  schemas: { ODataCollection: { type: object, required: [value], properties: { '@odata.context': { type: string }, '@odata.nextLink': { type: string }, value: { type: array, items: { type: object, additionalProperties: true } } } } }

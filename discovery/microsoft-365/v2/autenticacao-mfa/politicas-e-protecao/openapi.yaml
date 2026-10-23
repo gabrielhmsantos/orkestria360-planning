@@ -1,0 +1,9 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — Políticas de autenticação, version: v1 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /policies/authenticationMethodsPolicy: { get: { summary: Política de métodos; 200 observado no tenant, security: [{ graphApp: [Policy.Read.AuthenticationMethod] }], responses: { '200': { description: Entidade JSON }, '403': { description: Fonte restrita } } } }
+  /policies/authenticationStrengthPolicies: { get: { summary: Forças de autenticação; 200 sem query observado no tenant, security: [{ graphApp: [AuthenticationStrength.Read.All] }], responses: { '200': { description: Coleção OData }, '400': { description: '$top não aceito na consulta validada' }, '403': { description: Fonte restrita } } } }
+  /identity/conditionalAccess/policies: { get: { summary: Políticas de Acesso Condicional; 200 vazio válido observado, security: [{ graphApp: [Policy.Read.ConditionalAccess] }], responses: { '200': { description: Coleção OData }, '403': { description: Fonte restrita } } } }
+  /policies/identitySecurityDefaultsEnforcementPolicy: { get: { summary: Security Defaults; 200 observado no tenant, security: [{ graphApp: [Policy.Read.All] }], responses: { '200': { description: Entidade JSON }, '403': { description: Fonte restrita } } } }
+components: { securitySchemes: { graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token', scopes: { 'https://graph.microsoft.com/.default': Consentimentos Policy } } } } } }

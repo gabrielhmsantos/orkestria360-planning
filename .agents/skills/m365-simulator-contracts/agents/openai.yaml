@@ -1,0 +1,4 @@
+interface:
+  display_name: "Contratos M365 Simulator"
+  short_description: "Opere e evolua o simulador M365"
+  default_prompt: "Use $m365-simulator-contracts para verificar se uma rota já é simulada, testar o runtime ou evoluir seu contrato."

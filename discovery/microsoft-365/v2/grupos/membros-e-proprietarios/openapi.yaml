@@ -1,0 +1,14 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — Membros e Proprietários de Grupos, version: v1 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /groups/{group-id}/members: { get: { summary: Membros diretos; sem corpo, security: [{ graphApp: [] }], parameters: [{ $ref: '#/components/parameters/groupId' }], responses: { '200': { $ref: '#/components/responses/objects' }, '403': { description: Restrito; membership oculto exige Member.Read.Hidden }, '404': { description: Grupo ausente } } } }
+  /groups/{group-id}/transitiveMembers: { get: { summary: Membros transitivos; sem corpo, security: [{ graphApp: [] }], parameters: [{ $ref: '#/components/parameters/groupId' }], responses: { '200': { $ref: '#/components/responses/objects' }, '403': { description: Fonte restrita }, '404': { description: Grupo ausente } } } }
+  /groups/{group-id}/owners: { get: { summary: Proprietários; sem corpo, security: [{ graphApp: [] }], parameters: [{ $ref: '#/components/parameters/groupId' }], responses: { '200': { $ref: '#/components/responses/objects' }, '403': { description: Fonte restrita }, '404': { description: Grupo ausente } } } }
+  /groups/{group-id}/memberOf: { get: { summary: Grupos superiores diretos; sem corpo, security: [{ graphApp: [] }], parameters: [{ $ref: '#/components/parameters/groupId' }], responses: { '200': { $ref: '#/components/responses/objects' }, '403': { description: Fonte restrita } } } }
+  /groups/{group-id}/transitiveMemberOf: { get: { summary: Grupos superiores transitivos; sem corpo, security: [{ graphApp: [] }], parameters: [{ $ref: '#/components/parameters/groupId' }], responses: { '200': { $ref: '#/components/responses/objects' }, '403': { description: Fonte restrita } } } }
+components:
+  securitySchemes: { graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token', scopes: { 'https://graph.microsoft.com/.default': GroupMember.Read.All } } } } }
+  parameters: { groupId: { name: group-id, in: path, required: true, schema: { type: string } } }
+  responses: { objects: { description: Coleção OData de directoryObject, content: { application/json: { schema: { $ref: '#/components/schemas/Objects' } } } } }
+  schemas: { Objects: { type: object, required: [value], properties: { '@odata.context': { type: string }, value: { type: array, items: { type: object, required: [id], properties: { '@odata.type': { type: string }, id: { type: string }, displayName: { type: [string, 'null'], x-pii: true } }, additionalProperties: true } }, '@odata.nextLink': { type: [string, 'null'] } } } }

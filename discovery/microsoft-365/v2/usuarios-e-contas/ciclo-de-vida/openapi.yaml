@@ -1,0 +1,7 @@
+openapi: 3.1.0
+info: { title: Orkestria — Ciclo de Vida de Contas, version: v1, description: 'Não há comando Microsoft Graph aprovado nesta V2; endpoints são somente evidências.' }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /users: { get: { summary: Estado atual como evidência, security: [{ graphApp: [] }], responses: { '200': { description: Coleção OData Microsoft Graph }, '403': { description: Fonte restrita } } } }
+  /auditLogs/directoryAudits: { get: { summary: Eventos como evidência, security: [{ graphApp: [] }], responses: { '200': { description: Coleção OData Microsoft Graph }, '403': { description: Fonte restrita } } } }
+components: { securitySchemes: { graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token', scopes: { 'https://graph.microsoft.com/.default': User.Read.All e AuditLog.Read.All } } } } } }

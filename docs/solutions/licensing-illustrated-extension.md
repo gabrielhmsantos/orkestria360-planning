@@ -1,0 +1,5 @@
+# Licensing illustrated extension
+
+The Licenciamento flow is assembled by `LicensingPageData::for()` and rendered by the single `resources/js/pages/modules/licensing.tsx` surface. Capacity totals must filter `classification === eligible` plus `technicalStatus === active`; free, trial, capacity, technical and suspended SKUs remain visible in inventory but do not drive executive totals or capacity opportunities.
+
+The daily collector at `SyncMicrosoft365Licensing::persistTechnicalSnapshot()` is responsible for persisting the technical status and for closing stale capacity opportunities. `TenantLicenseSkuCalculationSetting` is the tenant/SKU source of truth for whether a technical SKU participates in capacity totals, opportunities and planning: the sync retains every snapshot, creates a default included rule only when missing, and the inventory remains visible when the rule excludes it. UI sections with no authorised commercial or nominal source should use `LicensingAvailability`, not a numeric fallback. Read-only opportunity evidence is a valid interaction; tenant mutations stay in `LicensingFutureAction`.

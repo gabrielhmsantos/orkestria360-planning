@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "kind": "documentary-example-not-formula-input",
+  "delivery_id": "EXEMPLO-SUBSTITUIR",
+  "revision": 1,
+  "phase": "intake",
+  "status": "registered",
+  "intent": null,
+  "planning": {
+    "repository": "planning",
+    "input_branch": null,
+    "source_context_commit": null,
+    "input_path": null,
+    "source_files": [],
+    "approved_commit": null,
+    "artifacts": []
+  },
+  "repositories": [],
+  "dependencies": [],
+  "gates": [],
+  "publication": {
+    "policy": "pull-request-only",
+    "completion_mode": "published-prs",
+    "pull_requests": [],
+    "agent_merge": false,
+    "auto_merge": false
+  },
+  "pending_decisions": [
+    "Definir a branch recebida, inputs/<delivery>/, commit e hashes das fontes, intenção, repositórios afetados, dependências e gates antes de executar."
+  ]
+}

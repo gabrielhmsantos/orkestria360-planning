@@ -1,0 +1,40 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph - Colaboracao e Compartilhamento, version: v1 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /admin/sharepoint/settings:
+    get:
+      summary: Configuracoes do tenant SharePoint
+      security: [{ graphApp: [SharePointTenantSettings.Read.All] }]
+      responses: { '200': { description: Configuracoes do tenant SharePoint, content: { application/json: { schema: { $ref: '#/components/schemas/SharePointSettings' } } } }, '403': { $ref: '#/components/responses/GraphError' } }
+  /policies/authorizationPolicy:
+    get:
+      summary: Politica de autorizacao
+      security: [{ graphApp: [Policy.Read.All] }]
+      responses: { '200': { description: Politica de autorizacao, content: { application/json: { schema: { $ref: '#/components/schemas/AuthorizationPolicy' } } } }, '403': { $ref: '#/components/responses/GraphError' } }
+  /policies/crossTenantAccessPolicy:
+    get:
+      summary: Politica de acesso entre tenants
+      security: [{ graphApp: [Policy.Read.All] }]
+      responses: { '200': { description: Politica de acesso entre tenants, content: { application/json: { schema: { $ref: '#/components/schemas/CrossTenantAccessPolicy' } } } }, '403': { $ref: '#/components/responses/GraphError' } }
+components:
+  securitySchemes:
+    graphApp:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token
+          scopes: { 'https://graph.microsoft.com/.default': Consentimentos Graph }
+  responses:
+    GraphError: { description: Erro Microsoft Graph, content: { application/json: { schema: { $ref: '#/components/schemas/GraphError' } } } }
+  schemas:
+    GraphError: { type: object, required: [error], properties: { error: { type: object, required: [code, message], properties: { code: { type: string }, message: { type: string } } } } }
+    SharePointSettings:
+      type: object
+      properties: { id: { type: string }, sharingCapability: { type: string }, sharingDomainRestrictionMode: { type: string }, sharingAllowedDomainList: { type: array, items: { type: string, x-pii: true } }, sharingBlockedDomainList: { type: array, items: { type: string, x-pii: true } }, allowedDomainGuidsForSyncApp: { type: array, items: { type: string } }, isLegacyAuthProtocolsEnabled: { type: boolean }, isResharingByExternalUsersEnabled: { type: boolean }, isUnmanagedSyncAppForTenantRestricted: { type: boolean }, isSyncButtonHiddenOnPersonalSite: { type: boolean }, isMacSyncAppEnabled: { type: boolean }, deletedUserPersonalSiteRetentionPeriodInDays: { type: integer }, personalSiteDefaultStorageLimitInMB: { type: integer }, idleSessionSignOut: { type: object, additionalProperties: true } }
+    AuthorizationPolicy:
+      type: object
+      properties: { id: { type: string }, displayName: { type: string }, description: { type: string }, allowInvitesFrom: { type: string }, allowedToSignUpEmailBasedSubscriptions: { type: boolean }, allowedToUseSSPR: { type: boolean }, allowEmailVerifiedUsersToJoinOrganization: { type: boolean }, allowUserConsentForRiskyApps: { type: boolean }, blockMsolPowerShell: { type: boolean }, guestUserRoleId: { type: string }, defaultUserRolePermissions: { type: object, additionalProperties: true } }
+    CrossTenantAccessPolicy:
+      type: object
+      properties: { id: { type: string }, displayName: { type: string }, allowedCloudEndpoints: { type: array, items: { type: string, format: uri } } }

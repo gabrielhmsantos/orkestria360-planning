@@ -1,0 +1,19 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — Governança e Ciclo de Vida de Grupos, version: v1, description: 'Somente leitura; renovação e revisões não são operações aprovadas.' }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /groups: { get: { summary: Datas de ciclo; sem corpo, security: [{ graphApp: [] }], parameters: [{ name: '$select', in: query, schema: { type: string, example: 'id,displayName,createdDateTime,expirationDateTime,renewedDateTime' } }], responses: { '200': { $ref: '#/components/responses/groups' }, '403': { description: Fonte restrita } } } }
+  /groupLifecyclePolicies: { get: { summary: Catálogo de políticas; sem corpo, security: [{ graphApp: [] }], responses: { '200': { $ref: '#/components/responses/policies' }, '403': { description: Fonte restrita } } } }
+  /groups/{group-id}/groupLifecyclePolicies: { get: { summary: Políticas associadas; sem corpo, security: [{ graphApp: [] }], parameters: [{ $ref: '#/components/parameters/groupId' }], responses: { '200': { $ref: '#/components/responses/policies' }, '403': { description: Fonte restrita }, '404': { description: Grupo ausente } } } }
+  /identityGovernance/accessReviews/definitions: { get: { summary: Definições de Access Reviews; sem corpo, security: [{ graphApp: [] }], parameters: [{ name: '$top', in: query, schema: { type: integer, maximum: 999 } }], responses: { '200': { $ref: '#/components/responses/accessReviews' }, '403': { description: Sem AccessReview.Read.All ou licença aplicável }, '429': { description: Respeitar Retry-After } } } }
+components:
+  securitySchemes: { graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token', scopes: { 'https://graph.microsoft.com/.default': Group.Read.All } } } } }
+  parameters: { groupId: { name: group-id, in: path, required: true, schema: { type: string } } }
+  responses:
+    groups: { description: Coleção OData de grupos, content: { application/json: { schema: { $ref: '#/components/schemas/Groups' } } } }
+    policies: { description: Coleção OData de políticas; value vazio requer confirmação sem filtro, content: { application/json: { schema: { $ref: '#/components/schemas/Policies' } } } }
+    accessReviews: { description: Coleção OData de definições; value vazio sem filtro é empty_valid_response, content: { application/json: { schema: { $ref: '#/components/schemas/AccessReviews' } } } }
+  schemas:
+    Groups: { type: object, required: [value], properties: { value: { type: array, items: { type: object, required: [id], properties: { id: { type: string }, displayName: { type: [string, 'null'], x-pii: true }, createdDateTime: { type: [string, 'null'], format: date-time }, expirationDateTime: { type: [string, 'null'], format: date-time }, renewedDateTime: { type: [string, 'null'], format: date-time } } } }, '@odata.nextLink': { type: [string, 'null'] } } }
+    Policies: { type: object, required: [value], properties: { value: { type: array, items: { type: object, required: [id], properties: { id: { type: string }, groupLifetimeInDays: { type: [integer, 'null'] }, managedGroupTypes: { type: [string, 'null'] } }, additionalProperties: true } }, '@odata.nextLink': { type: [string, 'null'] } } }
+    AccessReviews: { type: object, required: [value], properties: { '@odata.context': { type: string }, '@odata.count': { type: integer }, value: { type: array, items: { type: object, required: [id], properties: { id: { type: string }, displayName: { type: [string, 'null'], x-pii: true }, status: { type: [string, 'null'] }, createdDateTime: { type: [string, 'null'], format: date-time } }, additionalProperties: true } }, '@odata.nextLink': { type: [string, 'null'] } } }

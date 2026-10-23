@@ -1,0 +1,12 @@
+# Métodos de Autenticação — Contratos
+
+- Dados: métodos registrados, política de métodos/força, volume e sucesso/falha por método.
+- Integração: relatório de registro, consulta individual investigativa, `authenticationMethodsPolicy` e sign-ins; permissões declaradas no DOCX.
+
+## Integração com o sync coordenado
+
+Distribuição e adoção usam projeções locais de `GET /reports/authenticationMethods/userRegistrationDetails` e `GET /auditLogs/signIns`. A fotografia MFA já publica `methodsRegistered[]`: no tenant foram confirmados `microsoftAuthenticatorPush` para Authenticator por push e `mobilePhone` para telefone. `mobilePhone` não deve ser convertido em SMS ou ligação sem evidência adicional.
+
+`GET /users/{user-id}/authentication/phoneMethods` é leitura complementar investigativa por `user-id`, justificada apenas pelos campos exclusivos `phoneType` e `smsSignInState` que qualificam o telefone. Com `UserAuthenticationMethod.Read.All` consentida, a validação retornou `200`: `phoneType: mobile` e `smsSignInState: notAllowedByPolicy`. Logo, a leitura individual pode confirmar telefone móvel e o estado de SMS, mas não deve inferir ligação. `GET /users/{user-id}/authentication/methods` também é leitura complementar viável por chave e confirmou os tipos concretos password, telefone e Microsoft Authenticator. Nenhuma dessas rotas entra em coleta em massa: a distribuição continua na projeção de `userRegistrationDetails`.
+
+`GET /policies/authenticationMethodsPolicy` é nova coleta snapshot viável e justificada por configurações exclusivas. O coletor DEVE extrair e publicar as configurações `Sms` e `Voice` — estado, alvos incluídos/excluídos e `isOfficePhoneAllowed` quando presente — da mesma fotografia; os endpoints específicos `/sms` e `/voice` foram validados com `200`, mas não justificam chamadas adicionais de produção. Na data da validação, ambos retornaram `state: disabled`; Voice retornou `isOfficePhoneAllowed: false`. Para `mobilePhone`, a projeção local cruza cada política com os grupos publicados da identidade: com ambos desabilitados, exibe somente **Telefone móvel** como Fraco; com somente uma política habilitada para a identidade, exibe apenas o canal habilitado; com ambas habilitadas para a identidade, exibe SMS e Ligação. Se os grupos da identidade ou o escopo de uma política não estiverem publicados, o canal correspondente fica `unavailable`; a tela não faz consulta Graph. Cobertura/frescor/razão/result_state preservam a última publicação em falha; telemetria e promoção seguem o contrato de etapas, sem HTTP na transação.

@@ -1,0 +1,12 @@
+# Dashboard Executivo — Decisões
+
+- **Dependências C1/C2 aceitas (usuário; 2026-10-14):** composição reutiliza partição de compartilhamento por arquivo único e saúde diária reportada; clientes OneDrive e dispositivos Intune são populações independentes. Não inferir estados instantâneos, identidade de aparelho ou contexto de evento a partir de agregados. Pesos, ausência e publicação independente permanecem aprovados.
+
+- **Clarificação confirmada (2026-10-14):** aceito o pacote default-v1 de critérios das nove dimensões do Health Score, com denominadores, precisão, cobertura e contribuição zero por ausência explicitados em `contratos.md`. Mantém a fórmula/pesos aprovados e a ausência do card no Dashboard atual. *(origem: usuário; [clarificação 4](../backend-defaults-e-clarificacoes.md#clarificação-4--baseline-de-configurações-aceita-a))*
+
+- **Confirmada:** preservar a sequência KPI → análise → investigação → recomendações observada em `01.Dashboard Executivo.png`.
+- **Confirmada:** o OneDrive Health Score é próprio desta superfície e usa as nove dimensões e pesos aprovados no DOCX: provisionamento (10%), armazenamento saudável (15%), compartilhamento seguro (20%), ausência de links anônimos críticos (15%), retenção de desligados (10%), proteção/classificação (10%), sincronização saudável (10%), governança de contas (5%) e auditoria/monitoramento (5%). O catálogo totaliza 100% e será versionado na fixture.
+- **Clarificação — Q:** como uma dimensão não coletada participa do OneDrive Health Score? → **A:** todos os pesos continuam no denominador de `100`; dimensão sem coleta recebe pontuação `0` no respectivo peso, sem ser excluída do cálculo. A fixture de homologação publica o resultado sintético `75/100`. *(origem: usuário; 2026-09-14)*
+- **Clarificação — Q:** uma lacuna de publicação deve interromper toda a investigação do Dashboard? → **A:** B — cada card, gráfico ou lista publica cobertura e disponibilidade próprias; os blocos válidos permanecem visíveis e a lacuna não é convertida em dado. *(origem: usuário; 2026-09-14)*
+- **Clarificação — Q:** como rankings, riscos e recomendações levam à investigação? → **A:** A — cada item com destino publicado navega à aba relacionada com os filtros do item já aplicados. *(origem: usuário; 2026-09-14)*
+- **Sugerida/configurável:** faixas de atividade e utilização seguem as faixas recomendadas pelo sponsor quando formalizadas para o tenant.

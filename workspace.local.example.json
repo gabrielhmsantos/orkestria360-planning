@@ -1,0 +1,5 @@
+{
+  "application": "/caminho/absoluto/worktree-application",
+  "design-system": "/caminho/absoluto/worktree-design-system",
+  "simulator": "/caminho/absoluto/worktree-simulator"
+}

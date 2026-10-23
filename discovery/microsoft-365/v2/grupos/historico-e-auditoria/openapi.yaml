@@ -1,0 +1,33 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — Histórico e Auditoria de Grupos, version: v1 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /auditLogs/directoryAudits:
+    get:
+      summary: Eventos de diretório; sem corpo
+      security: [{ graphApp: [] }]
+      parameters: [{ name: '$top', in: query, schema: { type: integer, maximum: 999 } }, { name: '$orderby', in: query, schema: { type: string, example: 'activityDateTime desc' } }, { name: '$filter', in: query, schema: { type: string } }]
+      responses: { '200': { $ref: '#/components/responses/audits' }, '403': { description: Sem AuditLog.Read.All }, '429': { description: Respeitar Retry-After } }
+  /groups/delta:
+    get:
+      summary: Alterações incrementais; sem corpo
+      security: [{ graphApp: [] }]
+      parameters: [{ name: '$select', in: query, schema: { type: string } }, { name: Prefer, in: header, schema: { type: string, enum: [return=minimal] } }]
+      responses: { '200': { $ref: '#/components/responses/delta' }, '403': { description: Fonte restrita }, '410': { description: sync_reset; reiniciar carga idempotente usando Location quando fornecida } }
+  /directory/deletedItems/microsoft.graph.group:
+    get:
+      summary: Grupos excluídos logicamente; sem corpo
+      description: O cast microsoft.graph.group é obrigatório. $orderby=deletedDateTime requer ConsistencyLevel eventual e $count=true.
+      security: [{ graphApp: [] }]
+      parameters: [{ name: '$select', in: query, schema: { type: string, example: 'id,displayName,deletedDateTime,groupTypes,securityEnabled' } }, { name: '$top', in: query, schema: { type: integer, maximum: 999 } }, { name: '$orderby', in: query, schema: { type: string, example: 'deletedDateTime desc' } }, { name: '$count', in: query, schema: { type: boolean } }, { name: ConsistencyLevel, in: header, schema: { type: string, enum: [eventual] } }]
+      responses: { '200': { $ref: '#/components/responses/deletedGroups' }, '403': { description: Sem Group.Read.All }, '429': { description: Respeitar Retry-After } }
+components:
+  securitySchemes: { graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token', scopes: { 'https://graph.microsoft.com/.default': 'AuditLog.Read.All e Group.Read.All' } } } } }
+  responses:
+    audits: { description: Coleção OData de eventos; PII em ator/alvo/propriedades, content: { application/json: { schema: { $ref: '#/components/schemas/Audits' } } } }
+    delta: { description: Coleção e cursores opacos, content: { application/json: { schema: { $ref: '#/components/schemas/Delta' } } } }
+    deletedGroups: { description: Coleção OData de grupos excluídos; value vazio sem filtro é empty_valid_response, content: { application/json: { schema: { $ref: '#/components/schemas/DeletedGroups' } } } }
+  schemas:
+    Audits: { type: object, required: [value], properties: { '@odata.context': { type: string }, value: { type: array, items: { type: object, required: [id], properties: { id: { type: string }, activityDisplayName: { type: [string, 'null'] }, activityDateTime: { type: [string, 'null'], format: date-time }, category: { type: [string, 'null'] }, result: { type: [string, 'null'] }, initiatedBy: { type: object, x-pii: true }, targetResources: { type: array, items: { type: object, x-pii: true } } } } }, '@odata.nextLink': { type: [string, 'null'] } } }
+    Delta: { type: object, required: [value], properties: { value: { type: array, items: { type: object, required: [id], properties: { id: { type: string }, '@removed': { type: object }, 'members@delta': { type: array, items: { type: object } } }, additionalProperties: true } }, '@odata.nextLink': { type: [string, 'null'] }, '@odata.deltaLink': { type: [string, 'null'] } } }
+    DeletedGroups: { type: object, required: [value], properties: { '@odata.context': { type: string }, '@odata.count': { type: integer }, value: { type: array, items: { type: object, required: [id], properties: { id: { type: string }, displayName: { type: [string, 'null'], x-pii: true }, deletedDateTime: { type: [string, 'null'], format: date-time }, groupTypes: { type: array, items: { type: string } }, securityEnabled: { type: [boolean, 'null'], description: 'Em grupo de segurança excluído pode retornar false por limitação conhecida' } } } }, '@odata.nextLink': { type: [string, 'null'] } } }

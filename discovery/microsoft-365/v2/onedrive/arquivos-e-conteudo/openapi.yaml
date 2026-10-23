@@ -1,0 +1,331 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph — OneDrive content delta, version: v1.0 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /users/{user-id}/drive/root/delta:
+    get:
+      summary: Lista alterações no drive pessoal do usuário
+      description: A coleta canônica seleciona sharepointIds e parentReference; a query ampliada já teve observação sanitizada. parentReference mantém localização e relação de pasta; a coleção complementar de drives identifica o drive sem exigir item ativo.
+      security: [{ graphApp: [Files.Read.All] }]
+      parameters:
+        - { name: user-id, in: path, required: true, schema: { type: string } }
+        - { name: $select, in: query, required: false, schema: { type: string, const: 'id,name,size,createdDateTime,lastModifiedDateTime,webUrl,file,folder,deleted,remoteItem,shared,malware,sharepointIds,parentReference' } }
+      responses:
+        '200': { description: Página de alterações; links OData opacos. A query com sharepointIds foi observada por GET temporário., x-observed: true, content: { application/json: { schema: { $ref: '#/components/schemas/DriveItemDeltaCollection' } } } }
+        '401': { $ref: '#/components/responses/GraphError' }
+        '403': { $ref: '#/components/responses/GraphError' }
+        '404': { $ref: '#/components/responses/GraphError' }
+        '410': { $ref: '#/components/responses/GraphError' }
+        '429': { $ref: '#/components/responses/GraphError' }
+  /drives/{drive-id}/items/{driveItem-id}/extractSensitivityLabels:
+    post:
+      summary: Extrai rótulos de sensibilidade do arquivo e atualiza metadados defasados
+      security: [{ graphApp: [Files.Read.All] }]
+      parameters:
+        - { name: drive-id, in: path, required: true, schema: { type: string } }
+        - { name: driveItem-id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Rótulos extraídos; contrato documentado e mutação aprovada no escopo explícito. Sem observação local porque a coleta técnica temporária é GET-only., x-observed: false, content: { application/json: { schema: { $ref: '#/components/schemas/ExtractSensitivityLabelsResult' } } } }
+        '401': { $ref: '#/components/responses/GraphError' }
+        '403': { $ref: '#/components/responses/GraphError' }
+        '404': { $ref: '#/components/responses/GraphError' }
+        '423': { $ref: '#/components/responses/GraphError' }
+        '429': { $ref: '#/components/responses/GraphError' }
+  /drives/{drive-id}/items/{driveItem-id}/getActivitiesByInterval(startDateTime='{startDateTime}',endDateTime='{endDateTime}',interval='day'):
+    get:
+      summary: Lista buckets diários de acesso do item em intervalo explícito
+      security: [{ graphApp: [Files.Read.All] }]
+      parameters:
+        - { name: drive-id, in: path, required: true, schema: { type: string } }
+        - { name: driveItem-id, in: path, required: true, schema: { type: string } }
+        - { name: startDateTime, in: path, required: true, schema: { type: string, format: date-time } }
+        - { name: endDateTime, in: path, required: true, schema: { type: string, format: date-time } }
+      responses:
+        '200':
+          description: Buckets estatísticos; coleção vazia e access ausente não comprovam zero. incompleteData indica dados incompletos.
+          x-observed: true
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ItemActivityStatCollection' }
+        '401': { $ref: '#/components/responses/GraphError' }
+        '403': { $ref: '#/components/responses/GraphError' }
+        '404': { $ref: '#/components/responses/GraphError' }
+        '429': { $ref: '#/components/responses/GraphError' }
+  /drives/{drive-id}/items/{driveItem-id}/versions:
+    get:
+      summary: Lista versões atualmente disponíveis de um arquivo
+      description: Ordem da mais nova para a mais antiga. Seguir nextLink opaco. Nenhuma query na chamada inicial; não usar orderby nem interpretar id numérico como cardinalidade.
+      security: [{ graphApp: [Files.Read.All] }, { graphApp: [Files.ReadWrite.All] }, { graphApp: [Sites.Read.All] }, { graphApp: [Sites.ReadWrite.All] }]
+      parameters:
+        - { name: drive-id, in: path, required: true, schema: { type: string } }
+        - { name: driveItem-id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Coleção paginável de versões disponíveis; contrato oficial sem nova observação real nesta revisão.
+          x-observed: false
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DriveItemVersionCollection' }
+        '400': { $ref: '#/components/responses/GraphError' }
+        '401': { $ref: '#/components/responses/GraphError' }
+        '403': { $ref: '#/components/responses/GraphError' }
+        '404': { $ref: '#/components/responses/GraphError' }
+        '429': { $ref: '#/components/responses/GraphError' }
+        '500': { $ref: '#/components/responses/GraphError' }
+        '503': { $ref: '#/components/responses/GraphError' }
+  /sites/{site-id}/recycleBin/items:
+    get:
+      summary: Lista itens na lixeira do site pessoal do OneDrive corporativo
+      servers: [{ url: https://graph.microsoft.com/beta }]
+      security: [{ graphApp: [Files.Read.All] }]
+      parameters:
+        - { name: site-id, in: path, required: true, description: ID Graph composto hostname e GUIDs de site collection e web; não usar sharepointIds.siteId isoladamente., schema: { type: string } }
+        - { name: $top, in: query, required: false, schema: { type: integer, minimum: 1 } }
+        - { name: $select, in: query, required: false, schema: { type: string } }
+      responses:
+        '200': { description: Contrato documentado; Graph beta aceito pelo projeto. Sem 200 local porque a tentativa não resolveu site. Isso não equivale a vazio nem ausência global da fonte., x-observed: false, content: { application/json: { schema: { $ref: '#/components/schemas/RecycleBinItemCollection' } } } }
+        '401': { $ref: '#/components/responses/GraphError' }
+        '403': { $ref: '#/components/responses/GraphError' }
+        '404': { $ref: '#/components/responses/GraphError' }
+        '429': { $ref: '#/components/responses/GraphError' }
+  /users/{user-id}/drive:
+    get:
+      summary: Evidência auxiliar não selecionada — obtém drive com autenticação delegated
+      description: A documentação atual Get drive declara Application não suportada. A observação app-only anterior não altera o contrato público; a implementação seleciona a coleção /users/{id}/drives.
+      x-selected: false
+      security: [{ graphDelegated: [Files.Read] }]
+      parameters:
+        - { name: user-id, in: path, required: true, schema: { type: string } }
+        - { name: $select, in: query, required: false, schema: { type: string, const: 'id,driveType,sharePointIds' } }
+      responses:
+        '200': { description: 'Identificador do drive, tipo e identificadores SharePoint quando publicados; observado por GET temporário.', x-observed: true, content: { application/json: { schema: { $ref: '#/components/schemas/Drive' } } } }
+        '401': { $ref: '#/components/responses/GraphError' }
+        '403': { $ref: '#/components/responses/GraphError' }
+        '404': { $ref: '#/components/responses/GraphError' }
+        '429': { $ref: '#/components/responses/GraphError' }
+  /users/{user-id}/drives:
+    get:
+      summary: Lista drives disponíveis para correlação do OneDrive empresarial
+      security: [{ graphApp: [Files.Read.All] }, { graphApp: [Files.ReadWrite.All] }, { graphApp: [Sites.Read.All] }, { graphApp: [Sites.ReadWrite.All] }]
+      parameters:
+        - { name: user-id, in: path, required: true, schema: { type: string } }
+        - { name: $select, in: query, required: true, schema: { type: string, const: 'id,driveType,sharepointIds,owner,webUrl,system' } }
+      responses:
+        '200': { description: Coleção OData observada por GET sanitizado; campos opcionais não autorizam seleção arbitrária do primeiro drive., x-observed: true, content: { application/json: { schema: { $ref: '#/components/schemas/DriveCollection' } } } }
+        '401': { $ref: '#/components/responses/GraphError' }
+        '403': { $ref: '#/components/responses/GraphError' }
+        '404': { $ref: '#/components/responses/GraphError' }
+        '429': { $ref: '#/components/responses/GraphError' }
+components:
+  securitySchemes:
+    graphApp: { type: oauth2, flows: { clientCredentials: { tokenUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token', scopes: { Files.Read.All: Lê arquivos e permite extrair rótulos de sensibilidade, Files.ReadWrite.All: Lê e escreve arquivos, Sites.Read.All: Lê sites, Sites.ReadWrite.All: Lê e escreve sites } } } }
+    graphDelegated: { type: oauth2, flows: { authorizationCode: { authorizationUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize', tokenUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token', scopes: { Files.Read: Lê arquivos do usuário } } } }
+  responses:
+    GraphError:
+      description: Erro Microsoft Graph; ausência ou falha não equivale a valor zero.
+      headers:
+        Retry-After:
+          description: Instrução de espera quando enviada pelo provider; relevante para throttling 429.
+          schema: { type: string }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/GraphError' }
+  schemas:
+    ItemActivityStatCollection:
+      type: object
+      required: [value]
+      properties:
+        '@odata.context': { type: string, format: uri }
+        '@odata.nextLink': { type: string, format: uri }
+        value: { type: array, items: { $ref: '#/components/schemas/ItemActivityStat' } }
+    ItemActivityStat:
+      type: object
+      properties:
+        '@odata.type': { type: string }
+        id: { type: [string, 'null'] }
+        startDateTime: { type: [string, 'null'], format: date-time }
+        endDateTime: { type: [string, 'null'], format: date-time }
+        access: { oneOf: [{ $ref: '#/components/schemas/ItemActionStat' }, { type: 'null' }] }
+        create: { oneOf: [{ $ref: '#/components/schemas/ItemActionStat' }, { type: 'null' }] }
+        delete: { oneOf: [{ $ref: '#/components/schemas/ItemActionStat' }, { type: 'null' }] }
+        edit: { oneOf: [{ $ref: '#/components/schemas/ItemActionStat' }, { type: 'null' }] }
+        move: { oneOf: [{ $ref: '#/components/schemas/ItemActionStat' }, { type: 'null' }] }
+        isTrending: { type: [boolean, 'null'] }
+        incompleteData:
+          oneOf: [{ $ref: '#/components/schemas/IncompleteData' }, { type: 'null' }]
+          description: Faceta não nula indica incompletude mesmo com propriedades internas omitidas ou wasThrottled false.
+      additionalProperties: true
+    ItemActionStat:
+      type: object
+      properties:
+        '@odata.type': { type: string }
+        actionCount: { type: [integer, 'null'], format: int32, minimum: -2147483648, maximum: 2147483647 }
+        actorCount: { type: [integer, 'null'], format: int32, minimum: -2147483648, maximum: 2147483647 }
+      additionalProperties: true
+    IncompleteData:
+      type: object
+      properties:
+        '@odata.type': { type: string }
+        missingDataBeforeDateTime: { type: [string, 'null'], format: date-time }
+        wasThrottled: { type: [boolean, 'null'] }
+      additionalProperties: true
+    DriveItemVersionCollection:
+      type: object
+      required: [value]
+      properties:
+        '@odata.context': { type: string, format: uri }
+        '@odata.nextLink': { type: string, format: uri }
+        value: { type: array, items: { $ref: '#/components/schemas/DriveItemVersion' } }
+    DriveItemVersion:
+      type: object
+      properties:
+        '@odata.type': { type: string }
+        id: { type: [string, 'null'], description: ID opaco da versão; ausência ou nulo impede a contagem deduplicada. }
+        lastModifiedDateTime: { type: [string, 'null'], format: date-time }
+        lastModifiedBy: { oneOf: [{ $ref: '#/components/schemas/IdentitySet' }, { type: 'null' }] }
+        publication: { oneOf: [{ $ref: '#/components/schemas/PublicationFacet' }, { type: 'null' }] }
+        size: { type: [integer, 'null'], format: int64 }
+        content: { type: [string, 'null'], format: base64url, description: Campo do recurso geral; conteúdo não é consumido pela leitura de contagem. }
+        '@microsoft.graph.downloadUrl': { type: string, format: uri, description: URL pré-autenticada efêmera; descartar sem persistir ou registrar. }
+      additionalProperties: true
+    PublicationFacet:
+      type: object
+      properties:
+        '@odata.type': { type: string }
+        checkedOutBy: { oneOf: [{ $ref: '#/components/schemas/IdentitySet' }, { type: 'null' }] }
+        level: { type: [string, 'null'], description: Estado publicado pelo provider; não equivale à cardinalidade de versões. }
+        versionId: { type: [string, 'null'] }
+      additionalProperties: true
+    ExtractSensitivityLabelsResult:
+      type: object
+      required: [value]
+      properties:
+        value:
+          type: object
+          required: [labels]
+          properties:
+            labels:
+              type: array
+              items:
+                type: object
+                required: [sensitivityLabelId, assignmentMethod]
+                properties:
+                  sensitivityLabelId: { type: string }
+                  assignmentMethod: { type: string }
+                  tenantId: { type: string }
+    RecycleBinItemCollection:
+      type: object
+      required: [value]
+      properties:
+        '@odata.context': { type: string, format: uri }
+        '@odata.nextLink': { type: string, format: uri }
+        value: { type: array, items: { $ref: '#/components/schemas/RecycleBinItem' } }
+    RecycleBinItem:
+      type: object
+      required: [id]
+      properties:
+        id: { type: string, description: Identificador da transação de exclusão; não é o driveItem.id. }
+        name: { type: string }
+        size: { type: integer, format: int64 }
+        deletedDateTime: { type: string, format: date-time }
+        deletedFromLocation: { type: string }
+    DriveItemDeltaCollection:
+      type: object
+      required: [value]
+      properties:
+        '@odata.context': { type: string, format: uri }
+        '@odata.nextLink': { type: string, format: uri }
+        '@odata.deltaLink': { type: string, format: uri }
+        '@microsoft.graph.hasMoreData': { type: boolean }
+        '@microsoft.graph.syncStatus': { type: string }
+        value: { type: array, items: { $ref: '#/components/schemas/DriveItem' } }
+    DriveCollection:
+      type: object
+      required: [value]
+      properties:
+        '@odata.context': { type: string, format: uri }
+        '@odata.nextLink': { type: string, format: uri }
+        value: { type: array, items: { $ref: '#/components/schemas/Drive' } }
+    Drive:
+      type: object
+      required: [id]
+      properties:
+        id: { type: string }
+        '@odata.context': { type: string, format: uri }
+        driveType: { type: [string, 'null'], enum: [personal, business, documentLibrary, null] }
+        sharePointIds: { oneOf: [{ $ref: '#/components/schemas/SharePointIds' }, { type: 'null' }] }
+        sharepointIds: { $ref: '#/components/schemas/SharePointIds', description: Grafia do recurso documentado; sharePointIds foi a variante observada. }
+        webUrl: { type: string, format: uri }
+        owner: { $ref: '#/components/schemas/IdentitySet' }
+        system: { type: object, additionalProperties: true }
+    IdentitySet:
+      type: object
+      properties:
+        user: { $ref: '#/components/schemas/Identity' }
+        application: { $ref: '#/components/schemas/Identity' }
+        device: { $ref: '#/components/schemas/Identity' }
+        group: { $ref: '#/components/schemas/Identity' }
+      additionalProperties: true
+    Identity:
+      type: object
+      properties:
+        id: { type: string }
+        displayName: { type: string }
+        email: { type: string }
+      additionalProperties: true
+    DriveItem:
+      type: object
+      required: [id]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        size: { type: integer, format: int64 }
+        createdDateTime: { type: string, format: date-time }
+        lastModifiedDateTime: { type: string, format: date-time }
+        webUrl: { type: string, format: uri }
+        file: { $ref: '#/components/schemas/FileFacet' }
+        parentReference: { $ref: '#/components/schemas/ItemReference', description: Relação parental; no delta o membro path não recebe valor. Reconstruir caminhos pela hierarquia de IDs. }
+        folder: { type: object, additionalProperties: true }
+        deleted: { type: object, additionalProperties: true }
+        remoteItem: { type: object, additionalProperties: true }
+        shared: { type: object, additionalProperties: true }
+        malware:
+          type: object
+          properties:
+            description: { type: string }
+          additionalProperties: true
+        sharepointIds: { oneOf: [{ $ref: '#/components/schemas/SharePointIds' }, { type: 'null' }], description: Opcional; identificadores de interoperabilidade de SharePoint. }
+    ItemReference:
+      type: object
+      properties:
+        driveId: { type: string }
+        driveType: { type: string, enum: [personal, business, documentLibrary] }
+        id: { type: string, description: ID do item pai referenciado. }
+        name: { type: string }
+        path: { type: string, description: Caminho relativo da API percentual codificado no recurso geral; o delta não fornece valor para este membro. }
+        shareId: { type: string }
+        siteId: { type: string, description: ID Graph composto do site quando presente; não é o GUID sharepointIds.siteId. }
+        sharepointIds: { $ref: '#/components/schemas/SharePointIds' }
+      additionalProperties: true
+    SharePointIds:
+      type: object
+      properties:
+        siteId: { type: [string, 'null'], description: GUID da site collection SPSite; não é o ID composto Graph. Ausente em OneDrive pessoal. }
+        listId: { type: [string, 'null'] }
+        listItemId: { type: [string, 'null'] }
+        listItemUniqueId: { type: [string, 'null'] }
+        siteUrl: { type: [string, 'null'], format: uri }
+        tenantId: { type: [string, 'null'] }
+        webId: { type: [string, 'null'], description: GUID do SPWeb; combinado com hostname e siteId para formar o ID Graph. }
+        '@odata.type': { type: string }
+      additionalProperties: true
+    FileFacet:
+      type: object
+      properties:
+        mimeType: { type: string }
+        hashes:
+          type: object
+          properties:
+            quickXorHash: { type: string, description: Hash opaco usado apenas para agrupamento técnico. }
+      additionalProperties: true
+    GraphError: { type: object, required: [error], properties: { error: { type: object, required: [code, message], properties: { code: { type: string }, message: { type: string }, innerError: { type: object, additionalProperties: true } } } } }

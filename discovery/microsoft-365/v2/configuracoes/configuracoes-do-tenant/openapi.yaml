@@ -1,0 +1,110 @@
+openapi: 3.1.0
+info: { title: Microsoft Graph - Configuracoes do Tenant, version: v1 }
+servers: [{ url: https://graph.microsoft.com/v1.0 }]
+paths:
+  /organization:
+    get:
+      summary: Organizacoes do tenant
+      security: [{ graphApp: [Organization.Read.All] }]
+      parameters: [{ $ref: '#/components/parameters/OrganizationSelect' }]
+      responses:
+        '200': { description: Colecao OData de organizacoes, content: { application/json: { schema: { $ref: '#/components/schemas/OrganizationCollection' } } } }
+        '403': { $ref: '#/components/responses/GraphError' }
+  /organization/{organization-id}/branding:
+    get:
+      summary: Branding da organizacao
+      security: [{ graphApp: [OrganizationalBranding.Read.All] }]
+      parameters: [{ name: organization-id, in: path, required: true, schema: { type: string } }]
+      responses:
+        '200': { description: Entidade de branding, content: { application/json: { schema: { $ref: '#/components/schemas/OrganizationalBranding' } } } }
+        '403': { $ref: '#/components/responses/GraphError' }
+        '404': { $ref: '#/components/responses/GraphError' }
+  /domains:
+    get:
+      summary: Dominios verificados do tenant
+      security: [{ graphApp: [Domain.Read.All] }]
+      responses:
+        '200': { description: Colecao OData de dominios, content: { application/json: { schema: { $ref: '#/components/schemas/DomainCollection' } } } }
+        '403': { $ref: '#/components/responses/GraphError' }
+  /domains/{domain-id}:
+    get:
+      summary: Dominio individual
+      x-consumed-directly: false
+      security: [{ graphApp: [Domain.Read.All] }]
+      parameters: [{ name: domain-id, in: path, required: true, schema: { type: string } }]
+      responses:
+        '200': { description: Entidade dominio, content: { application/json: { schema: { $ref: '#/components/schemas/Domain' } } } }
+        '403': { $ref: '#/components/responses/GraphError' }
+        '404': { $ref: '#/components/responses/GraphError' }
+  /groupSettings:
+    get:
+      summary: Configuracoes de grupo
+      security: [{ graphApp: [GroupSettings.Read.All] }]
+      parameters: [{ $ref: '#/components/parameters/Top' }]
+      responses:
+        '200': { description: Colecao OData de configuracoes de grupo, content: { application/json: { schema: { $ref: '#/components/schemas/GroupSettingCollection' } } } }
+        '403': { $ref: '#/components/responses/GraphError' }
+  /groupSettingTemplates:
+    get:
+      summary: Modelos de configuracao de grupo
+      security: [{ graphApp: [GroupSettings.Read.All] }]
+      responses:
+        '200': { description: Colecao OData de modelos, content: { application/json: { schema: { $ref: '#/components/schemas/GroupSettingTemplateCollection' } } } }
+        '400': { $ref: '#/components/responses/GraphError' }
+        '403': { $ref: '#/components/responses/GraphError' }
+components:
+  parameters:
+    OrganizationSelect: { name: $select, in: query, schema: { type: string } }
+    Top: { name: $top, in: query, schema: { type: integer, minimum: 1 } }
+  securitySchemes:
+    graphApp:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token
+          scopes: { 'https://graph.microsoft.com/.default': Consentimentos Graph }
+  responses:
+    GraphError: { description: Erro Microsoft Graph, content: { application/json: { schema: { $ref: '#/components/schemas/GraphError' } } } }
+  schemas:
+    ODataLink: { type: string, format: uri }
+    GraphError:
+      type: object
+      required: [error]
+      properties: { error: { type: object, required: [code, message], properties: { code: { type: string }, message: { type: string }, innerError: { type: object, additionalProperties: true } } } }
+    OrganizationCollection:
+      type: object
+      required: [value]
+      properties: { '@odata.context': { type: string }, '@odata.nextLink': { $ref: '#/components/schemas/ODataLink' }, value: { type: array, items: { $ref: '#/components/schemas/Organization' } } }
+    Organization:
+      type: object
+      properties: { id: { type: string }, displayName: { type: string }, onPremisesSyncEnabled: { type: boolean }, createdDateTime: { type: string, format: date-time }, countryLetterCode: { type: string }, preferredLanguage: { type: string }, verifiedDomains: { type: array, items: { $ref: '#/components/schemas/VerifiedDomain' } } }
+    VerifiedDomain:
+      type: object
+      properties: { name: { type: string }, isDefault: { type: boolean }, isInitial: { type: boolean }, isVerified: { type: boolean }, capabilities: { type: string } }
+    DomainCollection:
+      type: object
+      required: [value]
+      properties: { '@odata.context': { type: string }, '@odata.nextLink': { $ref: '#/components/schemas/ODataLink' }, value: { type: array, items: { $ref: '#/components/schemas/Domain' } } }
+    Domain:
+      type: object
+      properties: { id: { type: string }, authenticationType: { type: string }, availabilityStatus: { type: string }, isAdminManaged: { type: boolean }, isDefault: { type: boolean }, isInitial: { type: boolean }, isRoot: { type: boolean }, isVerified: { type: boolean }, supportedServices: { type: array, items: { type: string } }, passwordValidityPeriodInDays: { type: integer }, passwordNotificationWindowInDays: { type: integer }, state: { type: object, additionalProperties: true } }
+    OrganizationalBranding:
+      type: object
+      properties: { id: { type: string }, backgroundColor: { type: string }, backgroundImageRelativeUrl: { type: string }, bannerLogoRelativeUrl: { type: string }, faviconRelativeUrl: { type: string }, headerBackgroundColor: { type: string }, headerLogoRelativeUrl: { type: string }, squareLogoRelativeUrl: { type: string }, squareLogoDarkRelativeUrl: { type: string }, signInPageText: { type: string }, usernameHintText: { type: string }, customTermsOfUseUrl: { type: string, format: uri }, customPrivacyAndCookiesUrl: { type: string, format: uri }, loginPageTextVisibilitySettings: { type: object, additionalProperties: true }, contentCustomization: { type: object, additionalProperties: true }, loginPageLayoutConfiguration: { type: object, additionalProperties: true } }
+    GroupSettingCollection:
+      type: object
+      required: [value]
+      properties: { '@odata.context': { type: string }, '@odata.nextLink': { $ref: '#/components/schemas/ODataLink' }, value: { type: array, items: { $ref: '#/components/schemas/GroupSetting' } } }
+    GroupSetting:
+      type: object
+      properties: { id: { type: string }, displayName: { type: string }, templateId: { type: string }, values: { type: array, items: { $ref: '#/components/schemas/SettingValue' } } }
+    GroupSettingTemplateCollection:
+      type: object
+      required: [value]
+      properties: { '@odata.context': { type: string }, '@odata.nextLink': { $ref: '#/components/schemas/ODataLink' }, value: { type: array, items: { $ref: '#/components/schemas/GroupSettingTemplate' } } }
+    GroupSettingTemplate:
+      type: object
+      properties: { id: { type: string }, deletedDateTime: { type: string, format: date-time }, displayName: { type: string }, description: { type: string }, values: { type: array, items: { $ref: '#/components/schemas/SettingValue' } } }
+    SettingValue:
+      type: object
+      properties: { name: { type: string }, value: { type: string } }

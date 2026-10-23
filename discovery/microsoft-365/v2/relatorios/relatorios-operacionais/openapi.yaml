@@ -1,0 +1,247 @@
+openapi: 3.1.0
+info:
+  title: Microsoft Graph — Relatórios Operacionais Microsoft 365
+  version: v1.0
+servers:
+  - url: https://graph.microsoft.com/v1.0
+paths:
+  /reports/getOffice365ServicesUserCounts(period='{period}'):
+    get:
+      summary: Obtém contagens de usuários por serviço e atividade
+      security:
+        - graphApp: [Reports.Read.All]
+      parameters:
+        - $ref: '#/components/parameters/PeriodShort'
+        - $ref: '#/components/parameters/IfNoneMatch'
+      responses:
+        '302':
+          $ref: '#/components/responses/ServicesUserCountsRedirect'
+        '304':
+          description: O relatório não mudou para o ETag informado.
+        '400':
+          $ref: '#/components/responses/GraphError'
+        '401':
+          $ref: '#/components/responses/GraphError'
+        '403':
+          $ref: '#/components/responses/GraphError'
+        '404':
+          $ref: '#/components/responses/GraphError'
+        '429':
+          $ref: '#/components/responses/GraphError'
+  /reports/getOffice365ActiveUserCounts(period='{period}'):
+    get:
+      summary: Obtém contagens diárias de usuários ativos Microsoft 365
+      x-observed: true
+      x-observed-period: D180
+      security:
+        - graphApp: [Reports.Read.All]
+      parameters:
+        - $ref: '#/components/parameters/PeriodShort'
+      responses:
+        '302':
+          $ref: '#/components/responses/ActiveUserCountsRedirect'
+        '400':
+          $ref: '#/components/responses/GraphError'
+        '401':
+          $ref: '#/components/responses/GraphError'
+        '403':
+          $ref: '#/components/responses/GraphError'
+        '404':
+          $ref: '#/components/responses/GraphError'
+        '429':
+          $ref: '#/components/responses/GraphError'
+  /reports/getEmailActivityUserDetail(period='{period}'):
+    get:
+      summary: Obtém atividade detalhada de e-mail; somente Send Count é agregado localmente
+      security:
+        - graphApp: [Reports.Read.All]
+      responses:
+        '302': { $ref: '#/components/responses/ActiveUserDetailRedirect' }
+  /reports/getTeamsUserActivityUserDetail(period='{period}'):
+    get:
+      summary: Obtém atividade detalhada Teams; Meeting Count representa participações
+      security:
+        - graphApp: [Reports.Read.All]
+      responses:
+        '302': { $ref: '#/components/responses/ActiveUserDetailRedirect' }
+  /reports/getSharePointSiteUsageSiteCounts(period='{period}'):
+    get:
+      summary: Obtém sites ativos no agregado All
+      security:
+        - graphApp: [Reports.Read.All]
+      responses:
+        '302': { $ref: '#/components/responses/ServicesUserCountsRedirect' }
+  /reports/getSharePointSiteUsageStorage(period='{period}'):
+    get:
+      summary: Obtém armazenamento SharePoint; convertido localmente para MB
+      security:
+        - graphApp: [Reports.Read.All]
+      parameters:
+        - $ref: '#/components/parameters/PeriodShort'
+      responses:
+        '302': { $ref: '#/components/responses/ServicesUserCountsRedirect' }
+  /reports/getOneDriveUsageStorage(period='{period}'):
+    get:
+      summary: Obtém armazenamento OneDrive; convertido localmente para MB
+      security:
+        - graphApp: [Reports.Read.All]
+      parameters:
+        - $ref: '#/components/parameters/PeriodShort'
+      responses:
+        '302': { $ref: '#/components/responses/ServicesUserCountsRedirect' }
+  /reports/getOffice365ActiveUserDetail(period='{period}'):
+    get:
+      summary: Obtém detalhes de atividade Microsoft 365 por usuário
+      x-observed: true
+      x-observed-period: D30
+      security:
+        - graphApp: [Reports.Read.All]
+      parameters:
+        - $ref: '#/components/parameters/PeriodActiveUserDetail'
+      responses:
+        '302':
+          $ref: '#/components/responses/ActiveUserDetailRedirect'
+        '400':
+          $ref: '#/components/responses/GraphError'
+        '401':
+          $ref: '#/components/responses/GraphError'
+        '403':
+          $ref: '#/components/responses/GraphError'
+        '404':
+          $ref: '#/components/responses/GraphError'
+        '429':
+          $ref: '#/components/responses/GraphError'
+components:
+  securitySchemes:
+    graphApp:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token
+          scopes:
+            Reports.Read.All: Lê relatórios de uso Microsoft 365.
+  parameters:
+    PeriodShort:
+      name: period
+      in: path
+      required: true
+      description: Período no parâmetro funcional do path Graph.
+      schema:
+        type: string
+        enum: [D7, D30, D90, D180]
+    PeriodActiveUserDetail:
+      name: period
+      in: path
+      required: true
+      description: Período no parâmetro funcional do path Graph.
+      schema:
+        type: string
+        enum: [D7, D30, D90, D180]
+    IfNoneMatch:
+      name: If-None-Match
+      in: header
+      required: false
+      schema:
+        type: string
+  responses:
+    ServicesUserCountsRedirect:
+      description: O endpoint Graph retorna somente o redirecionamento para o download CSV.
+      headers:
+        Location:
+          required: true
+          schema:
+            type: string
+            format: uri
+          description: URL opaca; não persistir nem reenviar Authorization ao destino.
+      x-post-redirect-download:
+        method: GET
+        authorization: forbidden
+        persistence: forbidden
+        response:
+          '200':
+            content:
+              application/octet-stream:
+                schema:
+                  $ref: '#/components/schemas/ServicesUserCountsCsv'
+    ActiveUserCountsRedirect:
+      description: O endpoint Graph retorna somente o redirecionamento para o download CSV.
+      headers:
+        Location:
+          required: true
+          schema:
+            type: string
+            format: uri
+          description: URL opaca, temporária e pré-autenticada; não persistir nem reenviar Authorization.
+      x-post-redirect-download:
+        method: GET
+        authorization: forbidden
+        persistence: forbidden
+        response:
+          '200':
+            content:
+              application/octet-stream:
+                schema:
+                  $ref: '#/components/schemas/ActiveUserCountsCsv'
+    ActiveUserDetailRedirect:
+      description: O endpoint Graph retorna somente o redirecionamento para o download CSV.
+      headers:
+        Location:
+          required: true
+          schema:
+            type: string
+            format: uri
+          description: URL opaca, temporária e pré-autenticada; não persistir nem reenviar Authorization.
+      x-post-redirect-download:
+        method: GET
+        authorization: forbidden
+        persistence: forbidden
+        response:
+          '200':
+            content:
+              application/octet-stream:
+                schema:
+                  $ref: '#/components/schemas/ActiveUserDetailCsv'
+    GraphError:
+      description: Erro ou restrição Microsoft Graph; não representa relatório vazio.
+      headers:
+        Retry-After:
+          required: false
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GraphError'
+  schemas:
+    GraphError:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            innerError:
+              type: object
+              additionalProperties: true
+    ServicesUserCountsCsv:
+      type: string
+      format: binary
+      description: CSV com data de atualização, contagens ativas/inativas por workload e período.
+      x-observed-content-type: application/octet-stream
+    ActiveUserCountsCsv:
+      type: string
+      format: binary
+      description: CSV com contagens diárias por workload e período.
+      x-observed-content-type: application/octet-stream
+      x-consumer-contract: Série somente após retenção de ao menos duas fotografias comparáveis.
+    ActiveUserDetailCsv:
+      type: string
+      format: binary
+      description: CSV com atividade por usuário; contém PII e produtos atribuídos. O consumidor de Relatórios publica apenas o agregado D30 necessário, nunca linhas pessoais.
+      x-observed-content-type: application/octet-stream
+      x-contains-pii: true

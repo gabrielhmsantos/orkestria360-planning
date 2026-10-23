@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "purpose": "Planning e mapa de ownership; não é configuração do GasCity",
+  "publication": {
+    "policy": "pull-request-only",
+    "final_state": "published-prs",
+    "agent_merge": false,
+    "auto_merge": false,
+    "direct_base_push": false
+  },
+  "repositories": {
+    "planning": {
+      "url": "https://github.com/gabrielhmsantos/orkestria360-planning.git",
+      "default_branch": "main",
+      "owns": [
+        "inputs",
+        "discovery",
+        "plans",
+        "specs",
+        "docs",
+        "deliveries",
+        "templates",
+        ".agents/skills"
+      ]
+    },
+    "application": {
+      "url": "https://github.com/gabrielhmsantos/Orkestria360.git",
+      "default_branch": "main",
+      "path_variable": "ORKESTRIA_APP_PATH",
+      "owns": [
+        "application-code",
+        "application-tests",
+        "database",
+        "private-env"
+      ]
+    },
+    "design-system": {
+      "url": "https://github.com/gabrielhmsantos/orkestria360-design-system.git",
+      "default_branch": "main",
+      "path_variable": "ORKESTRIA_DESIGN_SYSTEM_PATH",
+      "owns": [
+        "shared-components",
+        "storybook",
+        "ui-blueprint-upstream"
+      ]
+    },
+    "simulator": {
+      "url": "https://github.com/gabrielhmsantos/orkestria360-m365-simulator.git",
+      "default_branch": "main",
+      "path_variable": "ORKESTRIA_SIMULATOR_PATH",
+      "owns": [
+        "provider-contracts",
+        "provider-fixtures",
+        "simulator-runtime"
+      ]
+    }
+  },
+  "planning_artifacts": {
+    "root": "plans/<delivery>/r<revision>/",
+    "requirements_file": "requirements.md",
+    "plan_file": "implementation-plan.md",
+    "historical_reference": "specs/",
+    "delivery_evidence": "deliveries/<delivery>/r<revision>/",
+    "input_root": "inputs/<delivery>/"
+  }
+}

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Analisar Code Review"
+  short_description: "Valida retornos de code review"
+  default_prompt: "Use $analyze-code-review para validar este retorno de code review."
+
+policy:
+  allow_implicit_invocation: false
