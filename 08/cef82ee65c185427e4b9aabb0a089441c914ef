@@ -1,0 +1,29 @@
+plans/login-design-system/r2/decisions.md
+  s_c431ecaa74d155::t_fe6d3768a8d980 1-14
+discovery/login-design-system/r2.md
+  s_c431ecaa74d155::t_fe6d3768a8d980 1-30
+plans/login-design-system/r2/requirements.md
+  s_c431ecaa74d155::t_fe6d3768a8d980 1-22
+plans/login-design-system/r2/implementation-plan.md
+  s_c431ecaa74d155::t_fe6d3768a8d980 1-34
+deliveries/login-design-system/r2/manifest.json
+  s_c431ecaa74d155::t_9cd93d2d70c67b 1-54
+plans/login-design-system/r2/analysis.md
+  s_c431ecaa74d155::t_fe6d3768a8d980 1-31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "08cef82ee65c185427e4b9aabb0a089441c914ef",
+  "prompts": {},
+  "sessions": {
+    "s_c431ecaa74d155": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a197c6-5f5e-7d20-a6ff-8fc43da71c78",
+        "model": "gpt-6.1-terra"
+      },
+      "human_author": "Gabriel Santos <gabriel.hmedeirossantos@gmail.com>"
+    }
+  }
+}
