@@ -9,7 +9,7 @@ Referências e SHAs efetivamente lidos: pedido, spec, plano, contratos, princíp
 | ID | Prioridade | Requisito/contrato | Evidência | Impacto | Resolução ou decisão necessária |
 | --- | --- | --- | --- | --- | --- |
 
-Verifique cobertura de requisitos/superfícies, ambiguidades, autorização, significado dos dados, dependências entre rigs, critérios de aceite e viabilidade dos gates. A análise não deve enfraquecer intenção aprovada para acomodar implementação.
+Verifique cobertura de requisitos/superfícies, ambiguidades, autorização, significado dos dados, dependências entre repositórios, critérios de aceite e viabilidade dos gates. A análise não deve enfraquecer intenção aprovada para acomodar implementação.
 
 ## Resultado
 

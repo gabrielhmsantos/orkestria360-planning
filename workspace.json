@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "purpose": "Planning e mapa de ownership; não é configuração do GasCity",
+  "purpose": "Planning e mapa de ownership; independente do orquestrador de execução",
   "publication": {
     "policy": "pull-request-only",
     "final_state": "published-prs",

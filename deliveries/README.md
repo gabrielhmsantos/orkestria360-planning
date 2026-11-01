@@ -2,7 +2,7 @@
 
 Uma entrega que cruza repositórios precisa identificar exatamente o conjunto validado. Sem submódulos, essa composição é registrada por SHA e PR, não por gitlinks.
 
-Quando houver uma entrega autorizada, crie uma pasta `<delivery-id>/r<N>/` com seu manifesto e evidências sanitizadas. Use [manifest.example.json](../templates/manifest.example.json) como roteiro documental; ele não é ainda a entrada executável de uma fórmula GasCity.
+Quando houver uma entrega autorizada, crie uma pasta `<delivery-id>/r<N>/` com seu manifesto e evidências sanitizadas. Use [manifest.example.json](../templates/manifest.example.json) como roteiro documental; ele não é uma entrada executável nem substitui o contrato do workflow adotado.
 
 O manifesto registra a branch recebida (`input_branch`), o commit dos materiais (`source_context_commit`), `input_path=inputs/<delivery>/` e os paths/hashes das fontes consumidas. O commit de entrada permanece distinto do commit de Planning aprovado para execução dos produtos.
 
@@ -14,4 +14,4 @@ Estado de negócio proposto: `registered → planning → ready → executing �
 
 Para uma alteração, `published-prs` exige PRs OPEN nos repositórios proprietários dos entregáveis, branch/SHA/base verificados e auto-merge desligado. Não depende de merge; agentes jamais fazem merge ou push na base. Se houver falha de publicação, a entrega continua incompleta.
 
-Os receipts e o journal operacional da futura City podem ser mais detalhados. Preserve a separação entre o registro versionado para revisão e o estado mutável de execução; não declare que este template já implementa os contratos da City.
+Logs, receipts e estado operacional da ferramenta de execução podem conter mais detalhes. Preserve a separação entre registros versionados para revisão e estado mutável de execução; este template não substitui os contratos operacionais da ferramenta adotada.

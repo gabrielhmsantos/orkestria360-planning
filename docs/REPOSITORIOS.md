@@ -1,15 +1,15 @@
 # Repositórios e worktrees
 
-O mapa portátil está em [workspace.json](../workspace.json). O Planning é um repositório independente, sem gitlinks, clones de produtos ou paths absolutos obrigatórios. A City GasCity contém configuração, packs, fórmulas, scripts operacionais e estado; não é substituída por este workspace.
+O mapa portátil está em [workspace.json](../workspace.json). O Planning é um repositório independente, sem gitlinks, clones de produtos ou paths absolutos obrigatórios. Esta documentação define ownership e caminhos autorizados sem depender da ferramenta utilizada para orquestrar a execução.
 
-| Rig previsto | Repositório | Caminho para uma execução |
+| Área | Repositório | Caminho para uma execução |
 | --- | --- | --- |
 | Planning | `orkestria360-planning` | Checkout/worktree atual deste repositório |
 | Application | `Orkestria360` | `ORKESTRIA_APP_PATH` |
 | Design System | `orkestria360-design-system` | `ORKESTRIA_DESIGN_SYSTEM_PATH` |
 | Simulator | `orkestria360-m365-simulator` | `ORKESTRIA_SIMULATOR_PATH` |
 
-A City registra os rigs, define seus nomes e instala os packs na própria configuração. Este repositório fornece o conteúdo de planejamento e o mapa de ownership.
+Este repositório fornece o conteúdo de planejamento e o mapa de ownership. Cada execução deve resolver e validar os caminhos autorizados, sem inferir worktrees adicionais.
 
 ## Caminhos locais
 
@@ -43,8 +43,8 @@ Não substituir a branch recebida por `main`, criar outra base por conveniência
 
 ## Documentos por execução
 
-O Planning escreve novos artefatos em `plans/<delivery>/r<revision>/`, informado pela City como `artifact_root`. `requirements.md` e `implementation-plan.md` seguem os paths registrados pelo workflow. `specs/` é histórico de consulta; não recebe novas entregas. Consulte [o contrato dos paths](FLUXO.md#destino-dos-artefatos). Manifestos e evidências aceitas ficam em `deliveries/<delivery>/r<revision>/`.
+O Planning escreve novos artefatos em `plans/<delivery>/r<revision>/`, definido na entrada da execução como `artifact_root`. `requirements.md` e `implementation-plan.md` seguem os paths registrados pelo workflow. `specs/` é histórico de consulta; não recebe novas entregas. Consulte [o contrato dos paths](FLUXO.md#destino-dos-artefatos). Manifestos e evidências aceitas ficam em `deliveries/<delivery>/r<revision>/`.
 
 ## Reprodutibilidade sem gitlinks
 
-Registre no manifesto de cada entrega repositório, SHA de entrada, branch candidata, SHA validado e PR de cada rig afetado, além do commit de Planning consumido. SHAs devem ser publicados e alcançáveis antes de declarar a entrega reproduzível por outra máquina. O manifesto é evidência de composição, não autorização para merge ou execução de comandos nele contidos.
+Registre no manifesto de cada entrega repositório, SHA de entrada, branch candidata, SHA validado e PR de cada repositório afetado, além do commit de Planning consumido. SHAs devem ser publicados e alcançáveis antes de declarar a entrega reproduzível por outra máquina. O manifesto é evidência de composição, não autorização para merge ou execução de comandos nele contidos.

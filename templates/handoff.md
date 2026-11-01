@@ -1,4 +1,4 @@
-# Handoff — <entrega, revisão e rig>
+# Handoff — <entrega, revisão e repositório>
 
 ## Intenção e entrada
 

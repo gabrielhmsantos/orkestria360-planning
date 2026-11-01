@@ -1,6 +1,6 @@
 # Orkestria 360 — Planning
 
-Workspace de produto, discovery e planejamento do Orkestria 360. Os produtos têm repositórios e rigs independentes; este repositório não contém submódulos.
+Workspace de produto, discovery e planejamento do Orkestria 360. Os produtos têm repositórios independentes; este repositório não contém submódulos.
 
 Comece por [AGENTS.md](AGENTS.md), [produto e autoridades](docs/PRODUTO.md) e [fluxo de planejamento](docs/FLUXO.md).
 
@@ -17,9 +17,9 @@ Comece por [AGENTS.md](AGENTS.md), [produto e autoridades](docs/PRODUTO.md) e [f
 | [.agents/skills/](docs/SKILLS.md) | Seis skills locais completas, com referências, templates e validadores versionados |
 | [workspace.json](workspace.json) | Mapa portátil dos quatro repositórios e política de publicação |
 
-Você entrega a branch com os materiais versionados em `inputs/<delivery>/`. O rig Planning trabalha a partir desse commit, registra as fontes e produz os resultados nas pastas correspondentes. `briefing.md` é opcional.
+Você entrega a branch com os materiais versionados em `inputs/<delivery>/`. O processo de Planning trabalha a partir desse commit, registra as fontes e produz os resultados nas pastas correspondentes. `briefing.md` é opcional.
 
-Fluxo de planejamento: **materiais na branch recebida → discovery → clarificação → especificação/plano → análise → execução nos rigs → integração/validação → PRs abertos → aprendizado**. Nenhum agente faz merge, habilita auto-merge ou publica diretamente na branch-base.
+Fluxo de planejamento: **materiais na branch recebida → discovery → clarificação → especificação/plano → análise → execução nos repositórios afetados → integração/validação → PRs abertos → aprendizado**. Nenhum agente faz merge, habilita auto-merge ou publica diretamente na branch-base.
 
 Verifique a estrutura, a política de publicação e os links locais dos documentos, sem instalar dependências ou iniciar serviços:
 
@@ -27,6 +27,6 @@ Verifique a estrutura, a política de publicação e os links locais dos documen
 python3 scripts/check-workspace.py
 ```
 
-Leia [REPOSITORIOS.md](docs/REPOSITORIOS.md) para associar os caminhos dos worktrees. `.env`, credenciais e snapshots permanecem nos ambientes privados de Application. O registro dos rigs e a execução de fórmulas e agentes são responsabilidades da City.
+Leia [REPOSITORIOS.md](docs/REPOSITORIOS.md) para associar os caminhos dos worktrees. `.env`, credenciais e snapshots permanecem nos ambientes privados de Application. A ferramenta adotada para executar agentes deve usar o mapa de repositórios e respeitar a política de publicação deste Planning.
 
 Documentação e planos não comprovam implementação ou aprovação dos gates de uma entrega. Este checkout contém as referências de planejamento; consulte os produtos somente pelos worktrees explicitamente autorizados.
