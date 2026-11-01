@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "kind": "documentary-example-not-formula-input",
+  "kind": "documentary-example-not-executable-input",
   "delivery_id": "EXEMPLO-SUBSTITUIR",
   "revision": 1,
   "phase": "intake",
