@@ -1,6 +1,6 @@
 # Requisitos — <entrega>
 
-Destino: `<artifact_root>/requirements.md`, sob `plans/<delivery>/r<revision>/`. Inclua os campos e o YAML front matter exigidos pelo pack antes de submeter ao gate.
+Destino: `<artifact_root>/requirements.md`, sob `plans/<delivery>/r<revision>/`. Inclua os campos e metadados exigidos pelo contrato da entrega antes de submeter ao gate.
 
 Status: proposta. ID, revisão, responsável e fontes aprovadas devem ser identificados antes de usar como entrada de execução.
 
