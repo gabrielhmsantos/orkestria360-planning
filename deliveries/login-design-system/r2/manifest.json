@@ -1,0 +1,54 @@
+{
+  "delivery_id": "login-design-system",
+  "revision": "r2",
+  "state": "planning",
+  "intention": "Planejar a adequação visual do login ao Design System oficial preservando autenticação; r2 substitui r1 para planejamento futuro sem correção retroativa.",
+  "input_branch": "input/login-design-system",
+  "source_context_commit": "3ed28c02f495c7d5af94d82722d18f0551cf3b2f",
+  "execution_base_commit": "1166a7a0908064b4f964fd417a174afc47796bc9",
+  "input_path": "inputs/login-design-system/",
+  "source_files": {
+    "inputs/login-design-system/briefing.md": "2b1bd55413c0a1478ff8a51c2df482efd70b927197a1475a967c300c563d0274"
+  },
+  "artifact_root": "plans/login-design-system/r2/",
+  "requirements_path": "plans/login-design-system/r2/requirements.md",
+  "plan_path": "plans/login-design-system/r2/implementation-plan.md",
+  "repositories": {
+    "planning": {
+      "repository": "gabrielhmsantos/orkestria360-planning",
+      "commit": "1166a7a0908064b4f964fd417a174afc47796bc9"
+    },
+    "application": {
+      "repository": "gabrielhmsantos/Orkestria360",
+      "commit": "3ed550be9822b000082f2422aa21f5a3df66d465"
+    },
+    "design_system": {
+      "repository": "gabrielhmsantos/orkestria360-design-system",
+      "commit": "314627a38ae356f9296bdc8600cb444a1de666a0"
+    }
+  },
+  "artifacts": {
+    "discovery/login-design-system/r2.md": "0c89177c5d2df5ae63a37cdd380db25bf2c442b74ebbf2d4ef5e0b9de6ee9f00",
+    "plans/login-design-system/r2/analysis.md": "4343099b7984b5d4bfdfde15afbb6d382f1f9ccba65bb13198b2eb6e64a10470",
+    "plans/login-design-system/r2/decisions.md": "915388347edf924bc150ac5751b42866df313bf0af5260ef4cf19c5c9cda0880",
+    "plans/login-design-system/r2/implementation-plan.md": "13d13c94f8b2a19df7fa9879a246599ded615832e1e8d3a82b1a688ebf713b6d",
+    "plans/login-design-system/r2/requirements.md": "c9fadba88de3df4bf6c013c98284e871c2bc01b6b9998b62ac02aed1f3a480f2"
+  },
+  "dependencies": [
+    "Aprovação humana da proposta e revisão técnica independente vinculada aos hashes.",
+    "Ambiente Application isolado e avaliação da contraparte Design System para alterações compartilhadas."
+  ],
+  "pending": [
+    "Implementação futura e testes de produto funcionais, visuais e de acessibilidade.",
+    "Aprovação humana e publicação futura pelo mecanismo autorizado; nenhuma nova PR comprovada."
+  ],
+  "gates": {
+    "proveniencia": "Conferidos HEADs, remotos, ancestralidade e hash do briefing localmente.",
+    "estrutura": "Checker do workspace passou; não comprova implementação.",
+    "revisao_tecnica": "Pendente revisão independente dos artefatos e seus hashes.",
+    "aprovacao_humana": "Pendente; proposta não aprovada.",
+    "implementacao_testes": "Pendentes implementação e testes de produto.",
+    "publicacao": "Pendente; nenhuma nova PR foi criada ou confirmada."
+  },
+  "history": "PR #5 integrou 1166a7a0908064b4f964fd417a174afc47796bc9; segundo o intake run 01a19751-7e91-7773-82f4-ea9f1463163c terminou failed: delivery_unconfirmed."
+}
