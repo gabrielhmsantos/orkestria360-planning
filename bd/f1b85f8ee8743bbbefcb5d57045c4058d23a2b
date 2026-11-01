@@ -1,0 +1,30 @@
+discovery/login-design-system/discovery.md
+  s_f4569c5aa2bff4::t_bd70cd7b3d3029 1-19
+plans/login-design-system/r1/requirements.md
+  s_f4569c5aa2bff4::t_bd70cd7b3d3029 1-17
+deliveries/login-design-system/r1/manifest.json
+  s_f4569c5aa2bff4::t_bd70cd7b3d3029 1-36,41-78,85-108,131
+  s_f4569c5aa2bff4::t_3c47355ee9b197 37-40,79-84,109-130
+plans/login-design-system/r1/implementation-plan.md
+  s_f4569c5aa2bff4::t_bd70cd7b3d3029 1-37
+plans/login-design-system/r1/review-feedback.md
+  s_f4569c5aa2bff4::t_3c47355ee9b197 1-25
+plans/login-design-system/r1/analysis.md
+  s_f4569c5aa2bff4::t_bd70cd7b3d3029 1-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "bdf1b85f8ee8743bbbefcb5d57045c4058d23a2b",
+  "prompts": {},
+  "sessions": {
+    "s_f4569c5aa2bff4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a19511-e7f0-7f12-8b29-dfefb01ef3e6",
+        "model": "gpt-6.1-terra"
+      },
+      "human_author": "Gabriel Santos <gabriel.hmedeirossantos@gmail.com>"
+    }
+  }
+}
