@@ -37,7 +37,7 @@
       },
       {
         "path": "plans/login-design-system/r1/review-feedback.md",
-        "sha256": "8bea5158588c25a6a90fdef529c0ddfebcf71b0631b52f3e51710e8593653547"
+        "sha256": "32b828d171e8ef6ba4694880d2565466819fea7c5972386a12bcfb3113f9d674"
       }
     ]
   },
@@ -76,9 +76,9 @@
       "evidence": "python3 scripts/check-workspace.py: ok true, exit 0; não comprova integração."
     },
     {
-      "name": "revisão independente do planejamento",
+      "name": "revisão independente anterior do planejamento",
       "status": "passed",
-      "evidence": "plans/login-design-system/r1/review-feedback.md"
+      "evidence": "plans/login-design-system/r1/review-feedback.md identifica os hashes revisados; não cobre esta correção do manifesto."
     },
     {
       "name": "aprovação para implementação",
@@ -93,29 +93,63 @@
       "status": "not_assessed"
     },
     {
-      "name": "publicação",
-      "status": "pending"
+      "name": "publicação anterior do Planning observada",
+      "status": "passed",
+      "evidence": "GitHub PR #3 observada OPEN, base main, head zeroshot/v2-0fc6b1333eb4b790110e em bdf1b85f8ee8743bbbefcb5d57045c4058d23a2b, sem merge ou auto-merge; não inclui esta correção."
+    },
+    {
+      "name": "revisão independente desta correção",
+      "status": "pending",
+      "evidence": "Revisores devem registrar diagnóstico e hashes da versão efetivamente revisada."
+    },
+    {
+      "name": "publicação desta correção",
+      "status": "pending",
+      "evidence": "Delivery nativo deve resolver o HEAD e verificar base, candidato e política no handoff."
     }
   ],
   "publication": {
     "policy": "pull-request-only",
-    "pull_requests": [],
+    "pull_requests": [
+      {
+        "repository": "planning",
+        "number": 3,
+        "url": "https://github.com/gabrielhmsantos/orkestria360-planning/pull/3",
+        "observation": "publicação anterior; estado observado no GitHub, não publicação desta correção",
+        "state": "OPEN",
+        "base": "main",
+        "head_branch": "zeroshot/v2-0fc6b1333eb4b790110e",
+        "observed_head_sha": "bdf1b85f8ee8743bbbefcb5d57045c4058d23a2b",
+        "merged": false,
+        "auto_merge": false,
+        "draft": false
+      }
+    ],
     "agent_merge": false,
     "auto_merge": false,
     "direct_base_push": false,
-    "note": "Publicação reservada ao delivery nativo; não realizada nesta execução."
+    "note": "PR #3 observada no GitHub para a publicação anterior. Esta correção ainda depende do delivery nativo; o SHA do commit que contém este manifesto não é conhecido antecipadamente. Resolver o HEAD atual no Git/GitHub no handoff e verificar a eventual PR da correção; o SHA observado acima é histórico."
   },
   "pending_decisions": [
     "Aprovação para implementação; comparação em navegador, contraste e eventual necessidade de alinhamento compartilhado.",
-    "Conferir novamente base, candidato e política antes da publicação pelo delivery nativo."
+    "Conferir novamente base, candidato e política antes da publicação pelo delivery nativo.",
+    "Revisões desta correção e seus diagnósticos vinculados aos hashes efetivamente revisados ainda pendentes."
   ],
   "reviews": [
     {
-      "scope": "planning",
+      "scope": "planning, versão anterior identificada pelos hashes em review-feedback.md",
       "result": "accepted",
       "implementation_authorized": false,
       "evidence": "plans/login-design-system/r1/review-feedback.md",
       "reviewed_manifest_sha256": "21384383230f68d06780b2cdf3fe28e90761d07e107abcb50cc8d2fd52898322"
+    },
+    {
+      "scope": "correção anterior do manifesto e planejamento",
+      "result": "accepted",
+      "implementation_authorized": false,
+      "evidence": "plans/login-design-system/r1/review-feedback.md",
+      "reviewed_manifest_sha256": "a1546b3388e687c8825363414e2357dec5736a1914e66b7b790bd37d19b68fd7",
+      "note": "Feedbacks de acceptance e código; não abrangem o registro posterior destes feedbacks."
     }
   ],
   "delivery_reconciliation": {
@@ -125,7 +159,17 @@
     "run_branch_reported": "zeroshot/v2-0fc6b1333eb4b790110e",
     "head_revision": null,
     "pull_request_id": null,
-    "result": "base capturada ancestral do HEAD inicial; diff de commits contém apenas o briefing; artefatos de planejamento untracked inspecionados",
+    "result": "base capturada ancestral do HEAD inicial; diff de commits contém apenas o briefing; artefatos de planejamento untracked inspecionados; campos head_revision e pull_request_id nulos refletem o feedback anterior, não o estado posteriormente observado da PR #3.",
+    "evidence": "plans/login-design-system/r1/review-feedback.md"
+  },
+  "delivery_reconciliation_current": {
+    "source_revision": "bdf1b85f8ee8743bbbefcb5d57045c4058d23a2b",
+    "review_base_revision": "fd7bc9fcd2189cc25f53b521d60455b2125cae21",
+    "target_branch": "main",
+    "run_branch_reported": "zeroshot/v2-1931558ace999f896a73",
+    "head_revision": null,
+    "pull_request_id": null,
+    "result": "Base capturada ancestral do HEAD inicial; diff do candidato contém somente materiais desta entrega. Conferir novamente base e candidato no handoff.",
     "evidence": "plans/login-design-system/r1/review-feedback.md"
   }
 }
