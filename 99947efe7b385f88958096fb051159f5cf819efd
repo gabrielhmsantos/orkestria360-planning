@@ -1,0 +1,22 @@
+deliveries/login-design-system/r1/manifest.json
+  s_f8f031d8eec249::t_743e0a5c5d1183 40,145-152,163-172
+  s_f8f031d8eec249::t_0737c8d9f9b9ad 79,81,96-108,113-127,131,135-136,140,162
+plans/login-design-system/r1/review-feedback.md
+  s_f8f031d8eec249::t_743e0a5c5d1183 26-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "99947efe7b385f88958096fb051159f5cf819efd",
+  "prompts": {},
+  "sessions": {
+    "s_f8f031d8eec249": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a19528-2739-7b30-8ece-b47d8eb80b30",
+        "model": "gpt-6.1-terra"
+      },
+      "human_author": "Gabriel Santos <gabriel.hmedeirossantos@gmail.com>"
+    }
+  }
+}
