@@ -8,9 +8,9 @@ Requisitos/revisão em `<artifact_root>/requirements.md`, contratos, commit de P
 
 Como estender as fronteiras canônicas? Justifique complexidade nova e alternativas relevantes. Preserve intenção aprovada e semântica dos dados.
 
-## Escopo por rig
+## Escopo por repositório
 
-| Rig | Entregável | Contrato consumido/produzido | Dependência | Gate |
+| Repositório | Entregável | Contrato consumido/produzido | Dependência | Gate |
 | --- | --- | --- | --- | --- |
 
 ## Ondas e tarefas
