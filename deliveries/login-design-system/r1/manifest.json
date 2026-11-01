@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "delivery_id": "login-design-system",
+  "revision": 1,
+  "phase": "planning",
+  "status": "planning",
+  "intent": "Adequação visual do login ao Design System, sem alteração funcional nesta execução",
+  "planning": {
+    "repository": "planning",
+    "input_branch": "input/login-design-system",
+    "resolved_ref": "refs/remotes/origin/input/login-design-system",
+    "source_context_commit": "3ed28c02f495c7d5af94d82722d18f0551cf3b2f",
+    "input_path": "inputs/login-design-system/",
+    "source_files": [
+      {
+        "path": "inputs/login-design-system/briefing.md",
+        "sha256": "2b1bd55413c0a1478ff8a51c2df482efd70b927197a1475a967c300c563d0274"
+      }
+    ],
+    "approved_commit": null,
+    "artifacts": [
+      {
+        "path": "discovery/login-design-system/discovery.md",
+        "sha256": "4f5dbc42f21705e94e7bcc74fc66d1b250e0f737a425b6b3802b3ff7aafbcfdd"
+      },
+      {
+        "path": "plans/login-design-system/r1/requirements.md",
+        "sha256": "195298714ecfb131da373456f0461bb8efa83427237c737f529eb7a1f4c225bb"
+      },
+      {
+        "path": "plans/login-design-system/r1/implementation-plan.md",
+        "sha256": "68bf1a1eec140c856acb54b3c6d9ab6876ef72e62a2e1892bccae966e049c4d1"
+      },
+      {
+        "path": "plans/login-design-system/r1/analysis.md",
+        "sha256": "0ac76c55fd95ed28ddd918b85c36cca7f2255d04a90c357af4a74dd926eba0df"
+      },
+      {
+        "path": "plans/login-design-system/r1/review-feedback.md",
+        "sha256": "8bea5158588c25a6a90fdef529c0ddfebcf71b0631b52f3e51710e8593653547"
+      }
+    ]
+  },
+  "repositories": [
+    {
+      "name": "planning",
+      "remote": "https://github.com/gabrielhmsantos/orkestria360-planning.git",
+      "input_sha": "3ed28c02f495c7d5af94d82722d18f0551cf3b2f",
+      "candidate_sha": null
+    },
+    {
+      "name": "application",
+      "remote": "https://github.com/gabrielhmsantos/Orkestria360.git",
+      "input_sha": "3ed550be9822b000082f2422aa21f5a3df66d465",
+      "candidate_sha": null
+    },
+    {
+      "name": "design-system",
+      "remote": "https://github.com/gabrielhmsantos/orkestria360-design-system.git",
+      "input_sha": "314627a38ae356f9296bdc8600cb444a1de666a0",
+      "candidate_sha": null
+    }
+  ],
+  "dependencies": [
+    "Application depende de alinhamento DS apenas se houver mudança compartilhada; compatibilidade deve ser verificada por candidatos e versões."
+  ],
+  "gates": [
+    {
+      "name": "intake e integridade",
+      "status": "passed",
+      "evidence": "HEAD inicial, ref remota de entrada e hash do briefing conferidos; worktrees inicialmente limpos."
+    },
+    {
+      "name": "checker estrutural Planning",
+      "status": "passed",
+      "evidence": "python3 scripts/check-workspace.py: ok true, exit 0; não comprova integração."
+    },
+    {
+      "name": "revisão independente do planejamento",
+      "status": "passed",
+      "evidence": "plans/login-design-system/r1/review-feedback.md"
+    },
+    {
+      "name": "aprovação para implementação",
+      "status": "pending"
+    },
+    {
+      "name": "baseline visual e acessibilidade",
+      "status": "pending"
+    },
+    {
+      "name": "implementação e regressão nos produtos",
+      "status": "not_assessed"
+    },
+    {
+      "name": "publicação",
+      "status": "pending"
+    }
+  ],
+  "publication": {
+    "policy": "pull-request-only",
+    "pull_requests": [],
+    "agent_merge": false,
+    "auto_merge": false,
+    "direct_base_push": false,
+    "note": "Publicação reservada ao delivery nativo; não realizada nesta execução."
+  },
+  "pending_decisions": [
+    "Aprovação para implementação; comparação em navegador, contraste e eventual necessidade de alinhamento compartilhado.",
+    "Conferir novamente base, candidato e política antes da publicação pelo delivery nativo."
+  ],
+  "reviews": [
+    {
+      "scope": "planning",
+      "result": "accepted",
+      "implementation_authorized": false,
+      "evidence": "plans/login-design-system/r1/review-feedback.md",
+      "reviewed_manifest_sha256": "21384383230f68d06780b2cdf3fe28e90761d07e107abcb50cc8d2fd52898322"
+    }
+  ],
+  "delivery_reconciliation": {
+    "source_revision": "3ed28c02f495c7d5af94d82722d18f0551cf3b2f",
+    "review_base_revision": "fd7bc9fcd2189cc25f53b521d60455b2125cae21",
+    "target_branch": "main",
+    "run_branch_reported": "zeroshot/v2-0fc6b1333eb4b790110e",
+    "head_revision": null,
+    "pull_request_id": null,
+    "result": "base capturada ancestral do HEAD inicial; diff de commits contém apenas o briefing; artefatos de planejamento untracked inspecionados",
+    "evidence": "plans/login-design-system/r1/review-feedback.md"
+  }
+}
