@@ -1,0 +1,35 @@
+plans/login-design-system/r1/implementation-plan.md
+  s_e9609669dd3ed6::t_e21f7dfaba957f 1-6,8,10-19,22-28
+  s_e9609669dd3ed6::t_48e2cd5eab5826 7,9,20-21
+discovery/login-design-system/discovery.md
+  s_e9609669dd3ed6::t_48e2cd5eab5826 14,19-22
+  s_e9609669dd3ed6::t_e21f7dfaba957f 1-13,15-18
+plans/login-design-system/r1/analysis.md
+  s_e9609669dd3ed6::t_e21f7dfaba957f 1-13
+  s_e9609669dd3ed6::t_48e2cd5eab5826 14-19
+plans/login-design-system/r1/decisions.md
+  s_e9609669dd3ed6::t_48e2cd5eab5826 3,6,8-10
+  s_e9609669dd3ed6::t_e21f7dfaba957f 1-2,4-5,7
+deliveries/login-design-system/r1/manifest.md
+  s_e9609669dd3ed6::t_e21f7dfaba957f 1-15
+  s_e9609669dd3ed6::t_48e2cd5eab5826 16-19
+plans/login-design-system/r1/requirements.md
+  s_e9609669dd3ed6::t_48e2cd5eab5826 9,13
+  s_e9609669dd3ed6::t_e21f7dfaba957f 1-8,10-12,14-16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "18492c9f720965f209a99c24bc249547a3f6a20d",
+  "prompts": {},
+  "sessions": {
+    "s_e9609669dd3ed6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a19751-981f-7d12-934d-c4b928124d89",
+        "model": "gpt-6.1-terra"
+      },
+      "human_author": "Gabriel Santos <gabriel.hmedeirossantos@gmail.com>"
+    }
+  }
+}
