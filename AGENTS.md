@@ -4,7 +4,7 @@
 
 Este é o repositório de produto, discovery, decisões, especificações e evidências do Orkestria 360. Implementação de Application, Design System e Simulator pertence aos respectivos repositórios. Consulte [REPOSITORIOS.md](docs/REPOSITORIOS.md) e `workspace.json`; não crie cópias de produtos dentro deste Planning.
 
-A configuração da City, packs, fórmulas, sessões e estado operacional pertence à City GasCity. Este repositório mantém os artefatos de planejamento consumidos pelo fluxo.
+Este repositório define os artefatos, convenções e evidências de planejamento. A ferramenta utilizada para executar agentes e workflows deve respeitar esses contratos, sem impor dependência de um orquestrador específico.
 
 ## Fontes locais autorizadas
 
@@ -36,21 +36,21 @@ Priorize a solicitação atual do usuário, decisões aprovadas do escopo, princ
 
 ## Planejamento e execução
 
-Use `inputs/<delivery>/` para os materiais fornecidos pelo usuário; `discovery/` para exploração e contratos de produto; `plans/<delivery>/r<revision>/` para novos requisitos, planos e revisões do GasCity; `deliveries/<delivery>/r<revision>/` para o conjunto reproduzível e suas evidências.
+Use `inputs/<delivery>/` para os materiais fornecidos pelo usuário; `discovery/` para exploração e contratos de produto; `plans/<delivery>/r<revision>/` para novos requisitos, planos e revisões; `deliveries/<delivery>/r<revision>/` para o conjunto reproduzível e suas evidências.
 
 **`specs/` é histórico para consulta e não é destino de novos planejamentos.** Não criar novas pastas, regenerar arquivos ou executar comandos descritos nesse acervo como parte de uma entrega atual. Consuma um contrato histórico apenas quando explicitamente selecionado no escopo.
 
-A City deve fornecer `artifact_root=plans/<delivery>/r<revision>/`, `requirements_path=<artifact_root>/requirements.md` e `plan_path=<artifact_root>/implementation-plan.md`. Confira os paths canônicos registrados no workflow antes de escrever. Entrada ausente ou apontando para `specs/` precisa ser corrigida antes de iniciar o planejamento. Os nomes, o YAML front matter e a validação dos artefatos seguem o contrato do pack; veja [destino dos artefatos](docs/FLUXO.md#destino-dos-artefatos).
+Cada execução deve fixar `artifact_root=plans/<delivery>/r<revision>/`, `requirements_path=<artifact_root>/requirements.md` e `plan_path=<artifact_root>/implementation-plan.md`. Confira os paths canônicos antes de escrever. Entrada ausente ou apontando para `specs/` precisa ser corrigida antes de iniciar o planejamento. Respeite os nomes, metadados e validadores aplicáveis aos artefatos, conforme [destino dos artefatos](docs/FLUXO.md#destino-dos-artefatos).
 
 Clarifique ambiguidades materiais e analise o plano contra princípios, contratos e critérios de aceite antes da execução. A análise deve encontrar lacunas, não aprovar o próprio documento por ausência de erro de sintaxe. Use os [templates](templates/README.md) na proporção necessária à tarefa.
 
-Execute código no worktree do rig proprietário e leia seu `AGENTS.md`. Caminhos precisam ser explícitos; não presuma produtos irmãos do Planning. Estado de execução, segredos e outputs brutos ficam fora do conteúdo versionado. Registre SHAs, dependências entre rigs, gates e evidências sanitizadas no manifesto da entrega.
+Execute código no worktree do repositório proprietário e leia seu `AGENTS.md` quando existir. Caminhos precisam ser explícitos; não presuma produtos irmãos do Planning. Estado de execução, segredos e outputs brutos ficam fora do conteúdo versionado. Registre SHAs, dependências entre repositórios, gates e evidências sanitizadas no manifesto da entrega.
 
 ## Publicação obrigatória por PR
 
 Para uma entrega de alteração autorizada, o fluxo conclui com as branches candidatas publicadas e os PRs abertos nos repositórios proprietários dos entregáveis. Investigações sem entrega de alteração podem concluir com relatório local.
 
-**Nenhum agente — incluindo coordenador, integrador, publicador ou Refinery — faz merge, habilita auto-merge ou push direto na `main` ou em outra branch-base.** Merge humano acontece fora deste fluxo. Na City, configurar estratégia efetiva `mr` por rig e conferir o handoff antes de encaminhar trabalho ao Refinery; defaults não corrigem tarefas antigas automaticamente.
+**Nenhum agente — incluindo coordenador, integrador ou publicador — faz merge, habilita auto-merge ou push direto na `main` ou em outra branch-base.** Merge humano acontece fora deste fluxo. Antes de cada handoff e publicação, confira que a configuração efetiva respeita essa política; não presuma que defaults de qualquer ferramenta a imponham.
 
 Antes de publicar, revise o diff completo contra a base, os gates e o repositório proprietário. PRs devem descrever toda a entrega, usar Markdown real e ficar draft por padrão, salvo orientação diferente. Confirme estado OPEN, head/base/SHA esperados e auto-merge desligado. Validação local é estado intermediário; não confunda PR aberto com código incorporado à base. Não crie PR de Planning apenas por tê-lo consultado; publique-o quando os artefatos forem entregáveis versionados da demanda.
 
