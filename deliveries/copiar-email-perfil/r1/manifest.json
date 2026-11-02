@@ -1,0 +1,55 @@
+{
+  "revision": "r1",
+  "source_context_commit": "1f36b34e7a0fc9f2b0d0308ef0e694e1920216d5",
+  "execution_base_commit": "1f36b34e7a0fc9f2b0d0308ef0e694e1920216d5",
+  "delivery_id": "copiar-email-perfil",
+  "input_branch": "input/copiar-email-perfil",
+  "input_path": "inputs/copiar-email-perfil/",
+  "source_files": {
+    "inputs/copiar-email-perfil/briefing.md": "41c9fba7a4d5005b54d06e845105aab98f7ba372f1db5c4114ac0ee0fac3387b"
+  },
+  "source_file_commits": {
+    "inputs/copiar-email-perfil/briefing.md": "1f36b34e7a0fc9f2b0d0308ef0e694e1920216d5"
+  },
+  "artifact_root": "plans/copiar-email-perfil/r1/",
+  "requirements_path": "plans/copiar-email-perfil/r1/requirements.md",
+  "plan_path": "plans/copiar-email-perfil/r1/implementation-plan.md",
+  "repositories": {
+    "planning": {
+      "repository": "gabrielhmsantos/orkestria360-planning",
+      "commit": "1f36b34e7a0fc9f2b0d0308ef0e694e1920216d5"
+    },
+    "application": {
+      "repository": "gabrielhmsantos/Orkestria360",
+      "commit": "3ed550be9822b000082f2422aa21f5a3df66d465"
+    },
+    "design_system": {
+      "repository": "gabrielhmsantos/orkestria360-design-system",
+      "commit": "314627a38ae356f9296bdc8600cb444a1de666a0"
+    }
+  },
+  "state": "planning",
+  "intention": "Planejar ação acessível para copiar o e-mail visível no perfil sem salvar alterações.",
+  "dependencies": [
+    "Application e Design System nos SHAs observados; primitivas e hook existentes.",
+    "Ambiente isolado de UI e banco orkestria360_test para validação futura."
+  ],
+  "pending": [
+    "Revisão independente e aprovação aplicável do planejamento.",
+    "Implementação e validação funcional na Application.",
+    "Publicação futura de candidatos e PRs dos repositórios alterados."
+  ],
+  "gates": {
+    "planning": "Verificar conteúdo, proveniência e hashes; revisão independente pendente.",
+    "functional": "Sucesso, falhas, acessibilidade e regressões de perfil no navegador pendentes.",
+    "quality": "Tipos, lint, build, testes e composer ci:check na Application pendentes.",
+    "publication": "Revisão de diff, publicação de branches e PRs draft pendentes; merge e auto-merge proibidos."
+  },
+  "artifacts": {
+    "discovery/copiar-email-perfil/r1.md": "3d6c445b3c8a15dd8005caf16e1ea6016b8f5ec9867277dd50259d9c1b4413a2",
+    "plans/copiar-email-perfil/r1/requirements.md": "1e6e76978b746563cc7096761a3cc40c92fcf49323b301297af436e26f43444e",
+    "plans/copiar-email-perfil/r1/implementation-plan.md": "e588d2838d179133c0abbc73b2878ab40f5ec156111ab148b7e6fc74d50ac689",
+    "plans/copiar-email-perfil/r1/decisions.md": "52b3fb734c5d9ddb7fae2128826474abdce77ca56692703920cc83fd9799f14c",
+    "plans/copiar-email-perfil/r1/analysis.md": "283f030e34ba83f963823b512dc524c05bb843c63df70e3a4a6ee28a65abbc3b"
+  }
+}
